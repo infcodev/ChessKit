@@ -36,19 +36,19 @@ import Testing
     let position = try fenSerializator.deserialize(fen: fen)
     let game = Game(position: position)
 
-    #expect(game.positionsCounter[game.position.board] == 1)
+    #expect(game.positionsCounter[PositionKey(position: game.position)] == 1)
 
     try game.make(move: "b8a8")
     try game.make(move: "g4f3")
     try game.make(move: "a8b8")
     try game.make(move: "f3g4")
-    #expect(game.positionsCounter[game.position.board] == 2)
+    #expect(game.positionsCounter[PositionKey(position: game.position)] == 2)
 
     try game.make(move: "b8a8")
     try game.make(move: "g4f3")
     try game.make(move: "a8b8")
     try game.make(move: "f3g4")
-    #expect(game.positionsCounter[game.position.board] == 3)
+    #expect(game.positionsCounter[PositionKey(position: game.position)] == 3)
 }
 
 @Test func simpleMove() throws {

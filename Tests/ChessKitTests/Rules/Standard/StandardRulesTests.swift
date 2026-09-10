@@ -48,7 +48,7 @@ import Testing
         ("8/8/8/4N3/8/8/8/8 w - - 0 1", "c6 d7 f7 g6 g4 f3 d3 c4", "e5"),  // Alone at the center
         ("7N/8/8/8/8/8/8/8 w - - 0 1", "f7 g6", "h8"),  // Alone at the top right corner
         ("8/5P2/2K5/4N3/8/3R4/8/8 w - - 0 1", "d7 g6 g4 f3 c4", "e5"),  // Surrounded by pieces with same color
-        ("8/5p2/2k5/4N3/8/3r4/8/8 w - - 0 1", "c6 d7 f7 g6 g4 f3 d3 c4", "e5"),  // Taking a piece
+        ("8/5p2/2k5/4N3/8/3r4/8/8 w - - 0 1", "d7 f7 g6 g4 f3 d3 c4", "e5"),  // Taking a piece
 
         // King
         ("8/8/8/8/4K3/8/8/8 w - - 0 1", "d5 e5 f5 d4 f4 d3 e3 f3", "e4"),  // Alone at the center

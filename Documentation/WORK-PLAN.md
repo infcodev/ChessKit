@@ -3,7 +3,8 @@
 We will correct confirmed defects before we add new functions.
 We completed the serializer access and input contracts described below.
 We also corrected en passant, castling, and SAN conversion in the working revision.
-The remaining corrections are pending.
+We completed the position identity, result, and editing contracts described below.
+We keep release preparation and publication outside this implementation.
 The [known limits](KNOWN-LIMITS.md) contain the supporting findings.
 
 ## Delivery order
@@ -86,12 +87,25 @@ We corrected SAN ambiguity and full-square disambiguation.
 We test both colors, promotion choices, check suffixes, malformed input, and unchanged state after failure.
 The [moves and SAN guide](MOVES-AND-SAN.md) records the contract and migration.
 
-Position identity and game results remain the next rule domains.
-They are not completed by these input checks.
+## Completed position and result contracts
+
+We use a public `PositionKey` for repetitions and reset evidence after direct position edits.
+We distinguish current draw claims, declared-move claims, and automatic results.
+We expose static position validation and safe square boundaries.
+We reject king captures and inconsistent en passant captures.
+We use conservative material proofs for dead positions and expose the remaining uncertainty.
+The [game-state guide](GAME-STATE.md) records these contracts and migration steps.
+
+We confirmed six failing regressions with nine assertions before these corrections.
+We later reproduced and corrected noncanonical FEN output after reordering castling rights.
+We corrected an inherited test that expected a knight to capture the opposing king.
+We retained a separate public regression for that rule.
+We extended perft, added long-line checks, and added an independent comparison tool.
+The [verification guide](VERIFICATION.md) records commands and platform scope.
 
 ## Test plan
 
-We will add these test groups:
+We now cover these test groups:
 
 - Public API tests without internal access.
 - Regression tests for reproduced defects.
@@ -110,7 +124,7 @@ We will not present unexecuted tests as evidence of correctness.
 
 ## CI preparation
 
-We configured the `main` workflow with macOS tests and an iOS Simulator build.
+We extended the `main` workflow with optimized tests, an independent comparison, and iOS Simulator test execution.
 We pinned action revisions and removed the inherited Codecov configuration.
 We keep credentials outside the source code.
 We check CI results for each pull request.

@@ -59,7 +59,8 @@ public class FenSerialization {
 
         var castling = position.state.castlings
             .map { "\($0)" }
-            .reduce("") { $0 + $1 }
+            .sorted()
+            .joined()
         if castling == "" {
             castling = "-"
         }

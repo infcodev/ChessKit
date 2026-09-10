@@ -162,7 +162,7 @@ func gameResetsExtremeHalfmoveClock(fen: String, coordinate: String) throws {
     #expect(game.position.counter.halfMoves == 0)
     #expect(game.position.counter.fullMoves == (position.state.turn == .white ? 1 : 2))
     #expect(game.movesHistory == [move])
-    #expect(game.positionsCounter[game.position.board] == 1)
+    #expect(game.positionsCounter[PositionKey(position: game.position)] == 1)
 }
 
 @Test("The largest representable counters remain exact on a successful move")

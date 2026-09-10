@@ -9,6 +9,8 @@ public enum GameMoveError: Error, Equatable, Sendable {
 
     /// The move is not legal in the current position.
     case illegalMove
+    /// The edited starting position does not pass the static checks for standard play.
+    case invalidPosition([PositionValidationIssue])
     /// A direct edit set a negative halfmove clock or a fullmove number below one.
     case invalidPositionCounters
     /// Applying the move would exceed the storage range of the indicated counter.

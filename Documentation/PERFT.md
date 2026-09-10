@@ -19,16 +19,16 @@ We did not copy engine code or add a runtime dependency.
 
 | Position | Maximum depth | Expected leaves at that depth |
 | --- | --- | --- |
-| Initial position | 4 | 197,281 |
-| Kiwipete | 3 | 97,862 |
-| Rook and pawn ending | 4 | 43,238 |
+| Initial position | 5 | 4,865,609 |
+| Kiwipete | 4 | 4,085,603 |
+| Rook and pawn ending | 5 | 674,624 |
 | Promotions and castling, White to move | 3 | 9,467 |
 | Promotions and castling, mirrored | 3 | 9,467 |
 | Tactical promotions | 3 | 62,379 |
 | Middlegame | 3 | 89,890 |
 
 We check every depth from zero through the maximum in this table.
-This gives 30 reference count checks across seven positions.
+This gives 33 reference count checks across seven positions.
 We use depth zero to check the perft convention of one leaf, including at terminal positions.
 
 ## Test procedure
@@ -66,4 +66,5 @@ We calculate this additional report only when a reference count differs.
 These tests check move generation and state changes across a bounded set of positions and depths.
 They do not prove complete chess correctness or validate SAN, malformed input, draw claims, or a full release matrix.
 We keep individual regression tests for those responsibilities.
-We did not run a live differential comparison against Stockfish in this change.
+We also run a separate comparison against python-chess.
+The [verification guide](VERIFICATION.md) describes that check.

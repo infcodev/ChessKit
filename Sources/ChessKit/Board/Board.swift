@@ -34,6 +34,10 @@ public struct Board: Hashable {
      */
     public subscript(index: Int) -> Piece? {
         get {
+            guard (0..<Board.squaresCount).contains(index) else {
+                return nil
+            }
+
             let squareMask = Bitboard(1) << index
 
             var color: PieceColor! = nil
@@ -64,6 +68,10 @@ public struct Board: Hashable {
             return Piece(kind: kind, color: color)
         }
         set(piece) {
+            guard (0..<Board.squaresCount).contains(index) else {
+                return
+            }
+
             let squareMask = Bitboard(1) << index
 
             self.bitboards.white &= ~squareMask
@@ -113,9 +121,15 @@ public struct Board: Hashable {
      */
     public subscript(square: Square) -> Piece? {
         get {
+            guard square.isValid else {
+                return nil
+            }
             return self[square.index]
         }
         set(piece) {
+            guard square.isValid else {
+                return
+            }
             self[square.index] = piece
         }
     }
@@ -131,10 +145,16 @@ public struct Board: Hashable {
     public subscript(coordinate: String) -> Piece? {
         get {
             let square = Square(coordinate: coordinate)
+            guard square.isValid else {
+                return nil
+            }
             return self[square.index]
         }
         set(piece) {
             let square = Square(coordinate: coordinate)
+            guard square.isValid else {
+                return
+            }
             self[square.index] = piece
         }
     }

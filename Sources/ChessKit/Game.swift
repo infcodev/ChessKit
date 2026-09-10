@@ -10,14 +10,29 @@
 public class Game {
 
     private let rules: Rules
+    private var currentPosition: Position
+    private var initialValidationIssues: [PositionValidationIssue]
 
     /// Number of occurrences of each position in game.
-    public private(set) var positionsCounter: [Board: Int]
+    public private(set) var positionsCounter: [PositionKey: Int]
     /// List of moves made before current game position.
     public private(set) var movesHistory: [Move]
 
-    /// Current game position.
-    public var position: Position
+    /// Current game position. Direct assignment or nested editing resets history and occurrences.
+    public var position: Position {
+        get { currentPosition }
+        set {
+            currentPosition = newValue
+            initialValidationIssues = newValue.validationIssues
+            movesHistory = []
+            positionsCounter = [PositionKey(position: newValue, rules: rules): 1]
+        }
+    }
+
+    /// Number of occurrences of the current position since initialization or direct editing.
+    public var repetitionCount: Int {
+        positionsCounter[PositionKey(position: position, rules: rules), default: 0]
+    }
     /// Indicates whether it's check in current position.
     public var isCheck: Bool {
         return self.rules.isCheck(in: self.position)
@@ -29,11 +44,18 @@ public class Game {
 
     // MARK: Initialization
 
-    init(position: Position, moves: [Move], positionsCounter: [Board: Int]) {
-        self.position = position
+    init(
+        position: Position,
+        moves: [Move],
+        positionsCounter: [PositionKey: Int],
+        rules: Rules = StandardRules(),
+        validationIssues: [PositionValidationIssue]? = nil
+    ) {
+        self.currentPosition = position
+        self.initialValidationIssues = validationIssues ?? position.validationIssues
         self.movesHistory = moves
         self.positionsCounter = positionsCounter
-        self.rules = StandardRules()
+        self.rules = rules
     }
 
     /**
@@ -45,10 +67,11 @@ public class Game {
     */
     public init(position: Position, moves: [Move] = []) {
         self.positionsCounter = [
-            position.board: 1
+            PositionKey(position: position): 1
         ]
         self.movesHistory = moves
-        self.position = position
+        self.currentPosition = position
+        self.initialValidationIssues = position.validationIssues
         self.rules = StandardRules()
     }
 
@@ -62,10 +85,11 @@ public class Game {
      */
     internal init(position: Position, moves: [Move] = [], rules: Rules) {
         self.positionsCounter = [
-            position.board: 1
+            PositionKey(position: position, rules: rules): 1
         ]
         self.movesHistory = moves
-        self.position = position
+        self.currentPosition = position
+        self.initialValidationIssues = position.validationIssues
         self.rules = rules
     }
 
@@ -91,15 +115,20 @@ public class Game {
         }
 
         let counters = try self.counters(after: move)
+        guard initialValidationIssues.isEmpty else {
+            throw GameMoveError.invalidPosition(initialValidationIssues)
+        }
+
         var next = self.position.applyingLegalMove(move)
         next.counter = counters
 
-        let occurrences = self.positionsCounter[next.board, default: 0]
+        let key = PositionKey(position: next, rules: rules)
+        let occurrences = self.positionsCounter[key, default: 0]
         let nextOccurrences = try self.increment(occurrences, counter: .repetitions)
 
-        self.position = next
+        self.currentPosition = next
         self.movesHistory.append(move)
-        self.positionsCounter[next.board] = nextOccurrences
+        self.positionsCounter[key] = nextOccurrences
     }
 
     func isLegal(move: Move) -> Bool {
@@ -153,12 +182,14 @@ public class Game {
      */
     public func deepCopy() -> Game {
         let position = self.position
-        let moves = self.movesHistory.map { $0 }
+        let moves = self.movesHistory
 
         return Game(
             position: position,
             moves: moves,
-            positionsCounter: self.positionsCounter
+            positionsCounter: self.positionsCounter,
+            rules: self.rules,
+            validationIssues: self.initialValidationIssues
         )
     }
 

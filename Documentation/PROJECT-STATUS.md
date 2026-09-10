@@ -29,7 +29,9 @@ The [FEN input guide](FEN-INPUT.md) describes this incompatible API change.
 We also changed coordinate parsing, both `Game.make` overloads, and SAN input and output to throwing methods.
 We validate moves and reject counter overflow before modifying game state.
 The [moves and SAN guide](MOVES-AND-SAN.md) describes these API changes.
-Position identity and complete game results remain pending.
+We added `PositionKey`, static position validation, automatic results, and separate draw claims.
+We use conservative dead-position detection with an explicit scope limit.
+The [game-state guide](GAME-STATE.md) records these contracts and migration steps.
 
 We do not recommend this revision for production use.
 The [known limits](KNOWN-LIMITS.md) record the current findings.
@@ -45,9 +47,11 @@ We added coordinate and SAN input tests, promotion and ambiguity cases, and atom
 We test SAN inspection with extreme counters and game updates at their storage bounds.
 These tests do not establish complete position legality.
 
-We added a perft baseline with 30 published count checks and terminal-position controls.
+We extended the perft suite to 33 published count checks and terminal-position controls.
 We include these checks in the normal test suite.
 The [perft notes](PERFT.md) describe their scope and reference data.
+
+We record the latest executed checks in [validation results](VALIDATION-RESULTS.md).
 
 ## Generated API pages
 
@@ -59,7 +63,7 @@ We will check the examples and generate new pages after the public API changes.
 ## CI
 
 We configured CI for pushes and pull requests to `main`, with optional manual runs.
-We run tests with coverage on macOS and build for the iOS Simulator.
+We run debug and optimized tests, the independent comparison, and iOS Simulator builds and tests.
 We use Xcode 16.4 on `macos-15` and store coverage as a GitHub artifact.
 We removed the inherited Codecov configuration.
 

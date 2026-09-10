@@ -9,17 +9,17 @@ import Testing
         (
             "Initial position",
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-            [1, 20, 400, 8_902, 197_281]
+            [1, 20, 400, 8_902, 197_281, 4_865_609]
         ),
         (
             "Kiwipete",
             "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
-            [1, 48, 2_039, 97_862]
+            [1, 48, 2_039, 97_862, 4_085_603]
         ),
         (
             "Rook and pawn ending",
             "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1",
-            [1, 14, 191, 2_812, 43_238]
+            [1, 14, 191, 2_812, 43_238, 674_624]
         ),
         (
             "Promotions and castling, White to move",

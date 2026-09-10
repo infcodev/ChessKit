@@ -75,7 +75,7 @@ class PawnMoving: PieceMoving {
     }
 
     private func enPassantMoves(from square: Square, in position: Position) -> [Square] {
-        guard let enPassantSquare = position.state.enPasant else {
+        guard let enPassantSquare = position.validEnPassantTarget else {
             return []
         }
 

@@ -28,7 +28,8 @@ The [moves and SAN guide](MOVES-AND-SAN.md) records the accepted input and requi
 
 We keep parser and position checks separate.
 FEN parsing still accepts incomplete boards for position editing.
-The legality checks depend on the move generator and do not validate arbitrary direct board or square edits.
+We added safe square and board access and static position validation.
+The [game-state guide](GAME-STATE.md) defines the editing boundary and its errors.
 We have not established that an edited position is reachable from legal play.
 
 ## Castling
@@ -78,24 +79,26 @@ The [moves and SAN guide](MOVES-AND-SAN.md) describes accepted import alternativ
 
 ## Repetition and game results
 
-The repetition counter uses piece placement as its key.
-The key does not include the turn, castling rights, or relevant en passant state.
-We cannot use this counter alone to decide a draw by repetition.
+We corrected repetition identity to include the turn and relevant move rights.
+We distinguish claims from automatic results and reject results from structurally invalid positions.
+We reset recorded repetition evidence after a direct position edit.
+We cannot reconstruct prior repetitions from a FEN or an unverified historical move list alone.
 
-The package has no complete game-result API.
-We still need decisions and tests for draw claims, automatic draws, and dead positions.
-We can identify stalemate from an empty legal move list when the side to move is not in check.
+We use conservative material proofs for dead positions.
+We do not solve all blocked positions or forced continuations.
+We return `DeadPositionAssessment.notEstablished` outside the proven cases.
+We do not claim that this value proves a possible mate.
+We do not model time controls, resignation, draw agreements, or claim acceptance.
+The [game-state guide](GAME-STATE.md) records these limits.
 
 ## Test and platform limits
 
-The existing suite tests piece moves, special moves, SAN, FEN, and some game sequences.
-We added a perft baseline with seven reference positions and two terminal-position controls.
-We check all intermediate depths, through depth four for the initial position and rook ending, and depth three for the others.
-The [perft notes](PERFT.md) record the sources, counts, and limits.
-We have not added a live comparison against an independent chess implementation.
-We did not validate this revision across an iOS and macOS release matrix.
-
-The [project status](PROJECT-STATUS.md) describes the inherited API pages and CI configuration.
+We extended perft to depth five for the initial position and rook ending, and depth four for Kiwipete.
+We added public result and editing tests, long-line checks, and a live independent comparison.
+We use finite test inputs; we do not claim a mathematical proof for all chess positions.
+The [verification guide](VERIFICATION.md) records commands and the [validation results](VALIDATION-RESULTS.md) record execution.
+We still need the remote Xcode 16.4 jobs on the pushed revision before merging.
+We did not test physical iOS devices in this change.
 
 ## Scope limits
 

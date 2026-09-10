@@ -12,7 +12,7 @@ We use ChessKit in StudyChess and keep its core independent of the app interface
 | Move rules    | Generate legal moves and identify check or checkmate.   |
 | Special moves | Handle castling, en passant, and pawn promotion.        |
 | Notation      | Convert positions with FEN and moves with SAN.          |
-| Game state    | Store the current position, move history, and counters. |
+| Game state    | Track repetitions, inspect results, and distinguish draw claims. |
 
 We keep board views, study trees, comments, full PGN import, and engine control in the host app.
 We describe version-specific restrictions in [known limits](Documentation/KNOWN-LIMITS.md).
@@ -76,6 +76,10 @@ We use `Game.legalMoves` to show available moves.
 We apply a move with `try Game.make(move:)`, which checks legality and counter bounds before changing the game.
 Direct board edits change piece placement without applying game rules.
 We use direct edits for position setup, not for game play.
+We validate a completed diagram with `try position.validate()`.
+We inspect `Game.status` and `Game.availableDrawClaims` when we need a result or a draw claim.
+We use conservative material checks for dead positions; we do not solve arbitrary fortresses.
+The [game-state guide](Documentation/GAME-STATE.md) defines editing, repetition, and result contracts.
 
 We read FEN with `try FenSerialization().deserialize(fen:)` and handle `FenSerializationError` in the app.
 The [FEN input guide](Documentation/FEN-INPUT.md) describes accepted position input and error handling.
@@ -86,6 +90,7 @@ The [moves and SAN guide](Documentation/MOVES-AND-SAN.md) describes move parsing
 - [Known limits](Documentation/KNOWN-LIMITS.md): version-specific defects and restrictions.
 - [Project status](Documentation/PROJECT-STATUS.md): baseline, releases, and inherited documentation.
 - [Work plan](Documentation/WORK-PLAN.md): development priorities and acceptance criteria.
+- [Verification](Documentation/VERIFICATION.md): test commands and independent comparisons.
 - [Contributions](CONTRIBUTING.md): defect reports and local checks.
 - [Writing guide](Documentation/WRITING-GUIDE.md): language rules and technical terms.
 - [Change history](CHANGELOG.md): release notes.

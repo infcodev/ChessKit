@@ -37,6 +37,27 @@ We share board effects between game updates and SAN inspection; notation does no
 We added public regressions and preserved the existing rule and perft checks.
 The [moves and SAN guide](Documentation/MOVES-AND-SAN.md) describes the migration and remaining limits.
 
+### Incompatible API change: position identity and editing
+
+We change `Game.positionsCounter` from board keys to public `PositionKey` values.
+We account for the turn, castling rights, and legal en passant captures.
+We reset history and occurrence counts after direct edits to `Game.position`.
+We expose initializers and static validation for position data.
+We reject invalid starting positions in `Game.make` without partial updates.
+We make invalid square access safe and reject malformed coordinate aliases.
+We write castling rights in canonical FEN order after position edits.
+We reject king captures and en passant captures without the required board state.
+
+### Results and verification
+
+We add automatic results and separate current and declared-move draw claims.
+We document the conservative scope of dead-position detection.
+We preserve independent copies with Swift value storage instead of copying each history element.
+We extend perft to 33 count checks and add long-line and public contract tests.
+We compare public behavior with a separate pinned python-chess installation.
+We extend CI to optimized tests, independent comparison, and iOS Simulator test execution.
+The [game-state guide](Documentation/GAME-STATE.md) and [verification guide](Documentation/VERIFICATION.md) record the contracts and checks.
+
 ### Fork documentation
 
 We made the README a project guide.

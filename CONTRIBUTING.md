@@ -46,13 +46,16 @@ For public API changes, we require a consumer test without `@testable`.
 We run CI for pushes to `main` and pull requests to `main`.
 We also support manual runs after the workflow is available on `main`.
 We open pull requests against `main` to check changes on a feature branch.
-We check both CI jobs before we merge a pull request.
+We check all CI jobs before we merge a pull request.
 We use the `macos-15` runner with Xcode 16.4.
-We run the test suite with coverage and build the package for the iOS Simulator.
+We run debug tests with coverage, optimized tests, and the independent comparison.
+We build the package for the iOS Simulator and execute its test targets.
 We keep the coverage report as a GitHub artifact for 14 days.
 We do not upload coverage to Codecov or require a coverage token.
 
-The simulator build checks compilation. It does not run iOS tests.
+The generic simulator build checks compilation for both architectures.
+A separate step runs the tests on an available iPhone simulator.
+The [verification guide](Documentation/VERIFICATION.md) lists the local equivalents.
 We run `ChessKitPublicAPITests` with the main test command.
 This separate target uses `import ChessKit` without `@testable`.
 We extend these consumer tests when we change the public API.
