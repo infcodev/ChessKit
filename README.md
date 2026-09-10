@@ -2,7 +2,7 @@
 
 We develop ChessKit for apps that work with standard chess positions and moves.
 We provide a Swift library for board data, move rules, and chess notation.
-We use ChessKit in StudyChess and keep its core independent of the app interface.
+We keep the core independent of the host app interface.
 
 ## Scope
 

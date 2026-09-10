@@ -21,7 +21,7 @@ We do not repeat old implementation tasks as pending work.
 
 ## Release acceptance
 
-1. Integrate a reviewed candidate commit into StudyChess.
+1. Integrate a reviewed candidate commit into a host app.
 2. Apply the public API changes in the app's ChessKit adapter.
 3. Verify study loading, legal moves, promotions, notation, and error recovery in the app.
 4. Check every required remote CI job on the final commit.

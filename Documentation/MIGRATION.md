@@ -98,4 +98,4 @@ The [game-state guide](GAME-STATE.md) defines these contracts and dead-position 
 6. Check result display and distinguish claims from automatic draws.
 
 We record package-level tests separately from this app acceptance check.
-We do not claim that passing library tests completes StudyChess integration.
+We do not claim that passing library tests completes integration in the host app.

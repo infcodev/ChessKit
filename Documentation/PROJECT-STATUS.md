@@ -39,7 +39,7 @@ The [API generation guide](API-DOCUMENTATION.md) describes how we rebuild the re
 
 ## Remaining release work
 
-We must verify the candidate in StudyChess and review the required app changes.
+We must verify the candidate in a host app and review the required integration changes.
 We must check the remote CI jobs on the exact commit proposed for merge.
 The recorded local results do not establish a passed Xcode 16.4 remote run.
 We must then select the major version, finalize release notes, and publish the tested revision.

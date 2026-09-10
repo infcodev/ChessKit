@@ -37,7 +37,7 @@ The [perft guide](PERFT.md) records the 33 reference count checks and attributio
 We have not recorded remote Xcode 16.4 results for the final merge candidate here.
 We must verify that exact commit in CI before merging.
 We have no recorded physical iOS device or Intel Mac test run for this change.
-We must verify the consumer integration in StudyChess before release acceptance.
+We must verify integration in a host app before release acceptance.
 We do not infer exhaustive chess correctness from coverage, perft, or a finite independent comparison.
 We track these limits in [known limits](KNOWN-LIMITS.md) and delivery work in the [work plan](WORK-PLAN.md).
 
