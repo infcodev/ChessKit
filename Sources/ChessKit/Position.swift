@@ -18,6 +18,12 @@ public struct Position: Hashable {
         /// The square where pawn may be taken by en-passant move.
         public var enPasant: Square?
 
+        public init(turn: PieceColor, castlings: [Piece] = [], enPasant: Square? = nil) {
+            self.turn = turn
+            self.castlings = castlings
+            self.enPasant = enPasant
+        }
+
     }
 
     /// Position counter.
@@ -34,6 +40,11 @@ public struct Position: Hashable {
          It starts at 1, and is incremented after Black's move.
          */
         public var fullMoves: Int
+
+        public init(halfMoves: Int = 0, fullMoves: Int = 1) {
+            self.halfMoves = halfMoves
+            self.fullMoves = fullMoves
+        }
     }
 
     /// Board with pieces that represents current position.
@@ -42,5 +53,11 @@ public struct Position: Hashable {
     public var state: State
     /// Position counters.
     public var counter: Counter
+
+    public init(board: Board, state: State, counter: Counter = Counter()) {
+        self.board = board
+        self.state = state
+        self.counter = counter
+    }
 
 }

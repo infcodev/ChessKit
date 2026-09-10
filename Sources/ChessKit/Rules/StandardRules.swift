@@ -30,6 +30,17 @@ public class StandardRules: Rules {
             return false
         }
 
+        let enemyKings = position.board.bitboards.king
+            & position.board.bitboards.bitboard(for: position.state.turn.negotiated)
+        for file in -1...1 {
+            for rank in -1...1 where file != 0 || rank != 0 {
+                let adjacent = kingSquare.translate(file: file, rank: rank)
+                if adjacent.bitboardMask & enemyKings != 0 {
+                    return true
+                }
+            }
+        }
+
         let movingTranslation = MovingTranslations()
         let bitboards = position.board.bitboards
 
@@ -141,6 +152,13 @@ public class StandardRules: Rules {
      - Returns: List of available moves.
      */
     public func movesForPiece(at square: Square, in position: Position) -> [Move] {
+        let kings = position.board.bitboards.king
+        let whiteKings = kings & position.board.bitboards.white
+        let blackKings = kings & position.board.bitboards.black
+        guard square.isValid, whiteKings.nonzeroBitCount <= 1, blackKings.nonzeroBitCount <= 1 else {
+            return []
+        }
+
         guard let piece = position.board[square] else {
             return []
         }
@@ -180,6 +198,10 @@ public class StandardRules: Rules {
 
     private func filterIllegal(moves: [Move], for position: Position) -> [Move] {
         let filter = { (move: Move) -> Bool in
+            guard position.board[move.to]?.kind != .king else {
+                return false
+            }
+
             var nextPosition = position
             nextPosition.board[move.to] = nextPosition.board[move.from]
             nextPosition.board[move.from] = nil
@@ -202,6 +224,10 @@ public class StandardRules: Rules {
     }
 
     private func squareOfEnPassantCapturedPawn(move: Move, position: Position) -> Square? {
+        guard position.board[move.from]?.kind == .pawn else {
+            return nil
+        }
+
         guard let enPassant = position.state.enPasant else {
             return nil
         }

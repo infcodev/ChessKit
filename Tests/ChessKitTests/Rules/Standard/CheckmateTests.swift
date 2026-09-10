@@ -17,8 +17,8 @@ import Testing
         "r3R2k/8/1R4Q1/8/7p/7P/6PK/8 b - - 0 42"
     ]
 
-    positions.forEach {
-        let position = fenSerializator.deserialize(fen: $0)
+    try positions.forEach {
+        let position = try fenSerializator.deserialize(fen: $0)
         let game = Game(position: position)
 
         #expect(game.isCheck == true)

@@ -1,81 +1,52 @@
 # Known limits
 
-We reviewed upstream `2.0.0` at commit `bee00f535ae6c6182cc3d9c9a5bd5cfb5cbc5d83`.
-We separate source review findings from executed test results.
+We list current restrictions here.
+We keep resolved defects and their evidence in [correction history](HISTORY.md).
+We have no remaining confirmed defect from the completed correction plan.
+That statement does not prove that the library has no undiscovered defects.
 
-## Public serializers
+## Position editing
 
-The FEN and SAN serializer classes have no public initializers.
-An external app cannot construct these serializers through the documented API.
-Internal tests use `@testable` and do not detect this access limit.
+We accept incomplete FEN diagrams for editing.
+Successful FEN parsing does not establish that a position is valid for play.
+We validate a completed diagram with `try position.validate()`.
+We check static invariants but do not prove reachability from a legal game.
+We do not reconstruct previous moves or repetitions from FEN.
 
-We track the upstream report in [issue 15](https://github.com/aperechnev/ChessKit/issues/15).
-[Pull request 16](https://github.com/aperechnev/ChessKit/pull/16) proposes public initializers and an external API test.
-We did not apply that change.
+## Dead positions and results
 
-## Invalid input
+We prove dead positions only for the material cases listed in [game state](GAME-STATE.md#dead-position-scope).
+We do not solve arbitrary blocked positions, fortresses, or forced continuations.
+We return `.notEstablished` outside the supported proofs.
+This value does not prove that a mating sequence exists.
 
-The FEN, SAN, and move parsers assume valid input in several locations.
-Invalid input can cause an index error, a failed forced unwrap, or a failed precondition.
-These failures can stop the app instead of returning an error.
+We permit legal analysis moves after an automatic draw.
+We calculate the result for the current position and do not retain an earlier adjudicated result.
+The host app must retain that result for a live game.
+We do not model clocks, resignation, draw agreements, or acceptance of a draw claim.
 
-`Game.make` applies a move without a legal move check.
-A consumer must check a move before it calls this method.
-This check still depends on the correctness of the legal move generator.
+## Input scope
 
-We also found limits in position validation.
-For example, the castling generator trusts the supplied rights without checking that the required rook exists.
-We will define parser and position checks separately.
+We parse FEN positions, coordinate moves, and individual SAN tokens.
+We do not parse full PGN records, comments, annotations, or variations.
+We keep those operations in the host app.
+We document import allowances and error precedence in the [FEN](FEN-INPUT.md) and [SAN](MOVES-AND-SAN.md) guides.
 
-## En passant simulation
+## Product scope
 
-We identified a possible defect in the legal move filter.
-The filter can remove a pawn when another piece moves to the en passant square.
-This simulation can hide a check that remains after the actual move.
+We do not provide a board view, a study tree, storage, or a chess engine.
+We have not established Chess960 or other variant support.
+We do not add those features as prerequisites for this correction release.
 
-We will use this candidate regression case:
+## Verification scope
 
-| Field           | Value                                                                   |
-| --------------- | ----------------------------------------------------------------------- |
-| FEN             | `7k/8/8/3p1N2/4K3/8/8/8 w - d6 0 2`                                     |
-| Move            | `f5d6`                                                                  |
-| Expected result | The move is illegal. The pawn on d5 still attacks the white king on e4. |
-| Evidence        | Source review of `StandardRules.squareOfEnPassantCapturedPawn`.         |
-| Test status     | We did not execute this regression case.                                |
+We use finite regression, perft, contract, and independent comparison tests.
+We do not claim a proof of complete chess correctness.
+The independent reference also has limits and can share an error with another implementation.
+We combine it with explicit contract and state-invariant checks.
 
-## SAN output and input
-
-The SAN serializer omits the capture marker for en passant.
-For the capture from e5 to d6, the output must include `exd6`.
-The current code can produce `d6`.
-[Upstream issue 17](https://github.com/aperechnev/ChessKit/issues/17) reports this defect.
-
-Our source review also found incomplete SAN disambiguation.
-Some positions require both the source file and the source rank.
-The current output logic does not handle that combination.
-The input parser can select the first candidate without checking that it is unique.
-We will add regression cases for both conditions.
-
-## Repetition and game results
-
-The repetition counter uses piece placement as its key.
-The key does not include the turn, castling rights, or relevant en passant state.
-We cannot use this counter alone to decide a draw by repetition.
-
-The package has no complete game-result API.
-We still need decisions and tests for draw claims, automatic draws, and dead positions.
-We can identify stalemate from an empty legal move list when the side to move is not in check.
-
-## Test and platform limits
-
-The existing suite tests piece moves, special moves, SAN, FEN, and some game sequences.
-We did not find a perft suite or an independent rules comparison in this revision.
-We did not validate this revision across an iOS and macOS release matrix.
-
-The [project status](PROJECT-STATUS.md) describes the inherited API pages and CI configuration.
-
-## Scope limits
-
-We do not provide full PGN import, a study tree, a board view, or a chess engine.
-We did not establish support for Chess960 or other chess variants.
-The [work plan](WORK-PLAN.md) covers the changes we intend to make.
+We recorded local macOS and iPhone simulator results in [validation results](VALIDATION-RESULTS.md).
+We have no recorded physical iOS device or Intel Mac test run for this change.
+We still require remote CI evidence for the final commit, including the configured Xcode 16.4 runner.
+We have no dedicated Swift or Python lint runner configured.
+We use compiler warnings, syntax checks, and whitespace checks within the documented verification scope.

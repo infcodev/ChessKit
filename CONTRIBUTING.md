@@ -45,14 +45,22 @@ For public API changes, we require a consumer test without `@testable`.
 
 We run CI for pushes to `main` and pull requests to `main`.
 We also support manual runs after the workflow is available on `main`.
+We open pull requests against `main` to check changes on a feature branch.
+We check all CI jobs before we merge a pull request.
 We use the `macos-15` runner with Xcode 16.4.
-We run the test suite with coverage and build the package for the iOS Simulator.
+We run debug tests with coverage, optimized tests, and the independent comparison.
+We build the package for the iOS Simulator and execute its test targets.
 We keep the coverage report as a GitHub artifact for 14 days.
 We do not upload coverage to Codecov or require a coverage token.
 
-The simulator build checks compilation. It does not run iOS tests.
-The existing tests do not replace a public API consumer test.
-We add consumer tests with the public API corrections in our work plan.
+The generic simulator build checks compilation for both architectures.
+A separate step runs the tests on an available iPhone simulator.
+The [verification guide](Documentation/VERIFICATION.md) lists the local equivalents.
+We run `ChessKitPublicAPITests` with the main test command.
+This separate target uses `import ChessKit` without `@testable`.
+We extend these consumer tests when we change the public API.
+We also run `ChessKitAdversarialTests` without internal access.
+We verify its frozen corpus and run its independent campaign in CI.
 
 ## Review evidence
 
@@ -63,3 +71,11 @@ We do not change historical release notes to describe new behavior.
 
 We can propose general corrections to the upstream project after we validate them.
 We do not promise an upstream merge or release date.
+
+## Documentation changes
+
+We use the [documentation index](Documentation/README.md) to select the correct destination.
+We keep current contracts separate from defect history and release work.
+We follow the [API generation procedure](Documentation/API-DOCUMENTATION.md) when public declarations or API articles change.
+We validate local links and Swift examples before confirming a documentation update.
+We do not rewrite historical test results as newly executed evidence.

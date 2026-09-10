@@ -7,7 +7,7 @@
 //
 
 /// Represents piece and side color.
-public enum PieceColor {
+public enum PieceColor: Sendable {
 
     /// White color.
     case white

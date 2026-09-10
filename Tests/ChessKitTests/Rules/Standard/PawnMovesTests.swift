@@ -36,8 +36,8 @@ import Testing
         ("rnbqkbnr/ppp1pppp/8/8/3pP1P1/7P/PPPP1P2/RNBQKBNR b KQkq e3 0 3", "d4d3 d4e3", "d4"),
         ("8/8/3p2k1/P2Pr1Pp/3R2KP/8/8/8 w - h6 0 2", "g5h6", "g5"),
     ])
-func assert(fen: String, moves: String, coordinate: String) {
-    let position = FenSerialization().deserialize(fen: fen)
+func assert(fen: String, moves: String, coordinate: String) throws {
+    let position = try FenSerialization().deserialize(fen: fen)
     let square = Square(coordinate: coordinate)
     let moves = moves.split(separator: " ").map { "\($0)" }
     let testMoves = StandardRules().movesForPiece(at: square, in: position)

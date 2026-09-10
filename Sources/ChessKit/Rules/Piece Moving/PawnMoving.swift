@@ -75,7 +75,7 @@ class PawnMoving: PieceMoving {
     }
 
     private func enPassantMoves(from square: Square, in position: Position) -> [Square] {
-        guard let enPassantSquare = position.state.enPasant else {
+        guard let enPassantSquare = position.validEnPassantTarget else {
             return []
         }
 
@@ -99,20 +99,14 @@ class PawnMoving: PieceMoving {
         let promotions = destinations.filter { $0.rank == promotionRank }
         let destinations = destinations.filter { $0.rank != promotionRank }
 
-        var promotionMoves = promotions.flatMap {
-            [
-                "\(square)\($0)Q",
-                "\(square)\($0)R",
-                "\(square)\($0)B",
-                "\(square)\($0)N",
-            ]
-        }
-        if position.state.turn == .black {
-            promotionMoves = promotionMoves.map { $0.lowercased() }
+        let promotionKinds: [PieceKind] = [.queen, .rook, .bishop, .knight]
+        let promotionMoves = promotions.flatMap { destination in
+            promotionKinds.map { kind in
+                Move(from: square, to: destination, promotion: kind)
+            }
         }
 
-        return destinations.map { Move(from: square, to: $0) }
-            + promotionMoves.map { Move(string: $0) }
+        return destinations.map { Move(from: square, to: $0) } + promotionMoves
     }
 
 }

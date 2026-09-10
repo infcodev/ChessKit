@@ -32,6 +32,8 @@ jobs:
           swift --version
       - name: Run tests
         run: swift test --enable-code-coverage
+      - name: Run optimized tests and reject compiler warnings
+        run: swift test -c release -Xswiftc -warnings-as-errors
       - name: Collect coverage
         run: |
           mkdir -p coverage
@@ -45,7 +47,7 @@ jobs:
           retention-days: 14
 
   ios-build:
-    name: iOS Simulator build
+    name: iOS Simulator build and tests
     runs-on: macos-15
     timeout-minutes: 20
     steps:
@@ -58,3 +60,41 @@ jobs:
           -destination 'generic/platform=iOS Simulator'
           -derivedDataPath "$RUNNER_TEMP/ChessKit-iOS"
           CODE_SIGNING_ALLOWED=NO build
+      - name: Run tests on an available iPhone simulator
+        run: python3 Tools/Verification/run-ios-tests.py --derived-data "$RUNNER_TEMP/ChessKit-iOS-tests"
+
+  differential:
+    name: Independent rules comparison
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Install the separate test reference
+        run: |
+          python3 -m venv "$RUNNER_TEMP/chesskit-reference"
+          "$RUNNER_TEMP/chesskit-reference/bin/python" -m pip install -r Tools/Verification/requirements.txt
+      - name: Build the public API verifier
+        run: swift build --package-path Tools/Verification -c release -Xswiftc -warnings-as-errors
+      - name: Compare legal moves, SAN, positions, and results
+        run: >-
+          "$RUNNER_TEMP/chesskit-reference/bin/python" Tools/Verification/compare.py
+          --binary Tools/Verification/.build/release/ChessKitVerify
+      - name: Check frozen adversarial expectations
+        run: >-
+          "$RUNNER_TEMP/chesskit-reference/bin/python" Tools/Verification/adversarial.py
+          --check-corpus Tests/ChessKitAdversarialTests/Fixtures/independent.json
+      - name: Run adversarial public API campaign
+        run: >-
+          "$RUNNER_TEMP/chesskit-reference/bin/python" Tools/Verification/adversarial.py
+          --binary Tools/Verification/.build/release/ChessKitVerify
+          --report "$RUNNER_TEMP/chesskit-adversarial-report.json"
+      - name: Upload adversarial evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: adversarial-report
+          path: ${{ runner.temp }}/chesskit-adversarial-report.json
+          if-no-files-found: error
+          retention-days: 14

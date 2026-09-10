@@ -48,7 +48,7 @@ import Testing
         ("8/8/8/4N3/8/8/8/8 w - - 0 1", "c6 d7 f7 g6 g4 f3 d3 c4", "e5"),  // Alone at the center
         ("7N/8/8/8/8/8/8/8 w - - 0 1", "f7 g6", "h8"),  // Alone at the top right corner
         ("8/5P2/2K5/4N3/8/3R4/8/8 w - - 0 1", "d7 g6 g4 f3 c4", "e5"),  // Surrounded by pieces with same color
-        ("8/5p2/2k5/4N3/8/3r4/8/8 w - - 0 1", "c6 d7 f7 g6 g4 f3 d3 c4", "e5"),  // Taking a piece
+        ("8/5p2/2k5/4N3/8/3r4/8/8 w - - 0 1", "d7 f7 g6 g4 f3 d3 c4", "e5"),  // Taking a piece
 
         // King
         ("8/8/8/8/4K3/8/8/8 w - - 0 1", "d5 e5 f5 d4 f4 d3 e3 f3", "e4"),  // Alone at the center
@@ -75,7 +75,7 @@ import Testing
         ("8/8/8/8/8/8/2k5/R3K3 w Q - 0 1", "e2 f2 f1", "e1"),  // Castling behind the opposite king
     ])
 func availablePieceMoves(fen: String, targets: String, at coordinate: String) async throws {
-    let position = FenSerialization().deserialize(fen: fen)
+    let position = try FenSerialization().deserialize(fen: fen)
     let square = Square(coordinate: coordinate)
     let moves = targets.split(separator: " ").map { "\(square)\($0)" }
     let testMoves = StandardRules().movesForPiece(at: square, in: position)
@@ -109,8 +109,8 @@ func availablePieceMoves(fen: String, targets: String, at coordinate: String) as
             "h7h6 h7h5 g7g6 g7g5 f7f6 f7f5 e7e6 c6c5 b7b6 b7b5 a7a6 a7a5 g8h6 g8f6 e8d7 d8d7 d8d6 d8c7 d8b6 d8a5 c8d7 c8e6 c8f5 c8g4 c8h3 b8d7 b8a6"
         ),
     ])
-func availablePositionMoves(fen: String, testMoves: String) {
-    let position = FenSerialization().deserialize(fen: fen)
+func availablePositionMoves(fen: String, testMoves: String) throws {
+    let position = try FenSerialization().deserialize(fen: fen)
     let testMoves = testMoves.split(separator: " ").map { "\($0)" }
     let legalMoves = StandardRules().legalMoves(in: position)
     let legalMoveStrings = legalMoves.map({ $0.description }).sorted()

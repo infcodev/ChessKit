@@ -98,3 +98,21 @@ fastlane/test_output
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+
+# Generated API documentation (keep Documentation/ and *.docc source catalogs)
+/docs/
+*.doccarchive/
+
+# Test results and coverage
+*.xcresult/
+*.profraw
+*.profdata
+/coverage/
+
+# Local Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/

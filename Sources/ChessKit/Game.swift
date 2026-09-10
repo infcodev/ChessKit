@@ -10,14 +10,29 @@
 public class Game {
 
     private let rules: Rules
+    private var currentPosition: Position
+    private var initialValidationIssues: [PositionValidationIssue]
 
     /// Number of occurrences of each position in game.
-    public private(set) var positionsCounter: [Board: Int]
+    public private(set) var positionsCounter: [PositionKey: Int]
     /// List of moves made before current game position.
     public private(set) var movesHistory: [Move]
 
-    /// Current game position.
-    public var position: Position
+    /// Current game position. Direct assignment or nested editing resets history and occurrences.
+    public var position: Position {
+        get { currentPosition }
+        set {
+            currentPosition = newValue
+            initialValidationIssues = newValue.validationIssues
+            movesHistory = []
+            positionsCounter = [PositionKey(position: newValue, rules: rules): 1]
+        }
+    }
+
+    /// Number of occurrences of the current position since initialization or direct editing.
+    public var repetitionCount: Int {
+        positionsCounter[PositionKey(position: position, rules: rules), default: 0]
+    }
     /// Indicates whether it's check in current position.
     public var isCheck: Bool {
         return self.rules.isCheck(in: self.position)
@@ -29,11 +44,18 @@ public class Game {
 
     // MARK: Initialization
 
-    init(position: Position, moves: [Move], positionsCounter: [Board: Int]) {
-        self.position = position
+    init(
+        position: Position,
+        moves: [Move],
+        positionsCounter: [PositionKey: Int],
+        rules: Rules = StandardRules(),
+        validationIssues: [PositionValidationIssue]? = nil
+    ) {
+        self.currentPosition = position
+        self.initialValidationIssues = validationIssues ?? position.validationIssues
         self.movesHistory = moves
         self.positionsCounter = positionsCounter
-        self.rules = StandardRules()
+        self.rules = rules
     }
 
     /**
@@ -45,10 +67,11 @@ public class Game {
     */
     public init(position: Position, moves: [Move] = []) {
         self.positionsCounter = [
-            position.board: 1
+            PositionKey(position: position): 1
         ]
         self.movesHistory = moves
-        self.position = position
+        self.currentPosition = position
+        self.initialValidationIssues = position.validationIssues
         self.rules = StandardRules()
     }
 
@@ -62,10 +85,11 @@ public class Game {
      */
     internal init(position: Position, moves: [Move] = [], rules: Rules) {
         self.positionsCounter = [
-            position.board: 1
+            PositionKey(position: position, rules: rules): 1
         ]
         self.movesHistory = moves
-        self.position = position
+        self.currentPosition = position
+        self.initialValidationIssues = position.validationIssues
         self.rules = rules
     }
 
@@ -76,182 +100,77 @@ public class Game {
         return self.rules.legalMoves(in: self.position)
     }
 
-    /**
-     Make move.
-    
-     - Parameters:
-        - move: A move in a long algebraic notation (e.g., `"e2e4"`, `"g1f3"`, `"e7e8Q"`).
-     */
-    public func make(move stringMove: String) {
-        let move = Move(string: stringMove)
-        self.make(move: move)
+    /// Parses and applies a coordinate move.
+    /// - Throws: `MoveParsingError` or `GameMoveError`. A rejected move does not change the game.
+    public func make(move stringMove: String) throws {
+        let move = try Move(string: stringMove)
+        try self.make(move: move)
     }
 
-    /**
-    Make move.
-    
-    - Parameters:
-       - move: A move to make.
-    */
-    public func make(move: Move) {
+    /// Applies a legal move after checking all counters.
+    /// - Throws: `GameMoveError`. Position, history, and occurrence counts remain unchanged on failure.
+    public func make(move: Move) throws {
+        guard self.isLegal(move: move) else {
+            throw GameMoveError.illegalMove
+        }
+
+        let counters = try self.counters(after: move)
+        guard initialValidationIssues.isEmpty else {
+            throw GameMoveError.invalidPosition(initialValidationIssues)
+        }
+
+        var next = self.position.applyingLegalMove(move)
+        next.counter = counters
+
+        let key = PositionKey(position: next, rules: rules)
+        let occurrences = self.positionsCounter[key, default: 0]
+        let nextOccurrences = try self.increment(occurrences, counter: .repetitions)
+
+        self.currentPosition = next
         self.movesHistory.append(move)
-
-        let enPassant = self.updateEnPassant(for: move)
-
-        self.updateCounters(for: move)
-        self.updateCastlings(for: move)
-        self.perform(move: move)
-
-        self.position.state.enPasant = enPassant
-        self.toogleTurn()
-
-        if self.positionsCounter[self.position.board] == nil {
-            self.positionsCounter[self.position.board] = 0
-        }
-        self.positionsCounter[self.position.board]! += 1
+        self.positionsCounter[key] = nextOccurrences
     }
 
-    private func perform(move: Move) {
-        let isCastling =
-            position.board.bitboards.king & move.from.bitboardMask != Int64.zero
-            && abs(move.from.file - move.to.file) > 1
+    func isLegal(move: Move) -> Bool {
+        guard move.from.isValid, move.to.isValid, move.from != move.to else {
+            return false
+        }
 
-        let isEnPassant =
-            position.board.bitboards.pawn & move.from.bitboardMask != Int64.zero
-            && move.to == self.position.state.enPasant
+        return self.rules.movesForPiece(at: move.from, in: self.position).contains(move)
+    }
 
-        let isPawnPromotion = move.promotion != nil
+    private func counters(after move: Move) throws -> Position.Counter {
+        let current = self.position.counter
 
-        if isCastling {
-            self.performCastling(move: move)
-        } else if isEnPassant {
-            self.performEnPassant(move: move)
-        } else if isPawnPromotion {
-            self.performPawnPromotion(move: move)
+        guard current.halfMoves >= 0, current.fullMoves >= 1 else {
+            throw GameMoveError.invalidPositionCounters
+        }
+
+        let isPawnMove = self.position.board[move.from]?.kind == .pawn
+        let isCapture = self.position.board[move.to] != nil
+        var next = current
+
+        if isPawnMove || isCapture {
+            next.halfMoves = 0
         } else {
-            self.performSimple(move: move)
-        }
-    }
-
-    private func performSimple(move: Move) {
-        self.position.board[move.to] = self.position.board[move.from]
-        self.position.board[move.from] = nil
-    }
-
-    private func performCastling(move: Move) {
-        self.performSimple(move: move)
-
-        let rank = self.position.state.turn == .white ? "1" : "8"
-
-        if move.to.file == 2 {  // Queen side
-            self.performSimple(move: Move(string: "a" + rank + "d" + rank))
-        } else if move.to.file == 6 {  // King side
-            self.performSimple(move: Move(string: "h" + rank + "f" + rank))
-        }
-    }
-
-    private func performEnPassant(move: Move) {
-        self.performSimple(move: move)
-
-        guard let enPassant = self.position.state.enPasant else {
-            return
-        }
-
-        let rank = self.position.state.turn == .white ? 4 : 3
-        self.position.board[Square(file: enPassant.file, rank: rank)] = nil
-    }
-
-    private func performPawnPromotion(move: Move) {
-        self.performSimple(move: move)
-
-        guard let kind = move.promotion else {
-            return
-        }
-        self.position.board[move.to] = Piece(kind: kind, color: self.position.state.turn)
-    }
-
-    private func updateCounters(for move: Move) {
-        let isTaking =
-            position.board.bitboards.bitboard(for: position.state.turn.negotiated)
-            & move.to.bitboardMask != Int64.zero
-        let isPawnAdvance = position.board.bitboards.pawn & move.from.bitboardMask != Int64.zero
-
-        if isTaking || isPawnAdvance {
-            self.position.counter.halfMoves = 0
-        } else {
-            self.position.counter.halfMoves += 1
+            next.halfMoves = try self.increment(current.halfMoves, counter: .halfMoves)
         }
 
         if self.position.state.turn == .black {
-            self.position.counter.fullMoves += 1
+            next.fullMoves = try self.increment(current.fullMoves, counter: .fullMoves)
         }
+
+        return next
     }
 
-    private func toogleTurn() {
-        self.position.state.turn = self.position.state.turn.negotiated
-    }
+    private func increment(_ value: Int, counter: GameMoveError.Counter) throws -> Int {
+        let (result, overflow) = value.addingReportingOverflow(1)
 
-    private func updateEnPassant(for move: Move) -> Square? {
-        if position.board.bitboards.pawn & move.from.bitboardMask == Int64.zero {
-            return nil
-        }
-        guard abs(move.from.rank - move.to.rank) == 2 else {
-            return nil
+        guard !overflow else {
+            throw GameMoveError.counterOverflow(counter)
         }
 
-        let rank = self.position.state.turn == .white ? 2 : 5
-        return Square(file: move.from.file, rank: rank)
-    }
-
-    private func updateCastlings(for move: Move) {
-        guard let piece = self.position.board[move.from] else {
-            return
-        }
-
-        if piece.kind == .king {
-            self.position.state.castlings = self.position.state.castlings
-                .filter { $0.color != self.position.state.turn }
-        }
-
-        self.position.state.castlings = self.position.state.castlings.filter {
-            // filter should return true if we should not exclude
-            // filter should return false if we should exclude current castling
-            // $0 is one of KQkq pieces (white K, white Q, black k, black q)
-            // castlingColorAndSideToExclude returns piece if move from/to is at some of 4 corners
-            // if castlingColorAndSideToExclude returns piece
-            // for either "from" or for "to" square - we have to exclude casling
-            var excludeBecauseOfFrom = false
-            var excludeBecauseOfTo = false
-            if let colorAndSideToExclude = castlingColorAndSideToExclude(square: move.from) {
-                excludeBecauseOfFrom =
-                    $0.color == colorAndSideToExclude.color && $0.kind == colorAndSideToExclude.kind
-            }
-            if let colorAndSideToExclude = castlingColorAndSideToExclude(square: move.to) {
-                excludeBecauseOfTo =
-                    $0.color == colorAndSideToExclude.color && $0.kind == colorAndSideToExclude.kind
-            }
-            return !(excludeBecauseOfFrom || excludeBecauseOfTo)
-        }
-    }
-
-    private func castlingColorAndSideToExclude(square: Square) -> Piece? {
-        // is A1?
-        if square.file == 0 && square.rank == 0 {
-            return Piece(kind: .queen, color: .white)
-        }
-        // is H1?
-        if square.file == 7 && square.rank == 0 {
-            return Piece(kind: .king, color: .white)
-        }
-        // is A8?
-        if square.file == 0 && square.rank == 7 {
-            return Piece(kind: .queen, color: .black)
-        }
-        // is H8?
-        if square.file == 7 && square.rank == 7 {
-            return Piece(kind: .king, color: .black)
-        }
-        return nil
+        return result
     }
 
     // MARK: Utilities
@@ -263,12 +182,14 @@ public class Game {
      */
     public func deepCopy() -> Game {
         let position = self.position
-        let moves = self.movesHistory.map { $0 }
+        let moves = self.movesHistory
 
         return Game(
             position: position,
             moves: moves,
-            positionsCounter: self.positionsCounter
+            positionsCounter: self.positionsCounter,
+            rules: self.rules,
+            validationIssues: self.initialValidationIssues
         )
     }
 

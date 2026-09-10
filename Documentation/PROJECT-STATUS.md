@@ -1,51 +1,47 @@
 # Project status
 
-We use this document for version-specific information.
-The [README](../README.md) describes the purpose and use of the library.
+We completed the planned rule and public API corrections.
+We also completed local verification, including the adversarial black-box suite.
+We have no remaining confirmed defect from that plan.
+We have not completed release acceptance or published a fork release.
 
-## Baseline
+## Baseline and candidate
 
-We started from upstream `master` at commit `bee00f535ae6c6182cc3d9c9a5bd5cfb5cbc5d83`.
-This commit is upstream version `2.0.0`.
+We started from upstream 2.0.0 at commit `bee00f535ae6c6182cc3d9c9a5bd5cfb5cbc5d83`.
 We use `main` as the default branch of [our fork](https://github.com/infcodev/ChessKit).
+We prepare these corrections on `chesskit-corrections` before merging them into `main`.
+We do not assume that `main` contains an unmerged candidate.
+We use a reviewed commit for development integration.
+The inherited version tags refer to upstream releases and do not include these corrections.
 
-We changed the project documentation only.
-We did not change the Swift source code or the existing tests.
-We did not publish a new package release.
-The inherited tags identify upstream releases, not our corrections.
+## Current implementation
 
-## Integration status
+We provide recoverable FEN, coordinate-move, and SAN errors.
+We validate legal moves and reject counter overflow before changing a game.
+We support position identity, repetition counts, static position validation, results, and draw claims.
+We keep incomplete position editing separate from legal play.
+We describe incompatible changes in the [migration guide](MIGRATION.md).
 
-The public FEN and SAN serializers have no public initializers.
-An external app cannot construct these serializers through the documented upstream API.
-The board example in our README uses public board and piece initializers instead.
+We use conservative dead-position checks.
+We retain the remaining restrictions in [known limits](KNOWN-LIMITS.md).
+We keep corrected defects in [correction history](HISTORY.md), not in the open work list.
 
-We do not recommend this revision for production use.
-The [known limits](KNOWN-LIMITS.md) record the current findings.
-The [work plan](WORK-PLAN.md) defines the proposed corrections and tests.
+## Verification and documentation
 
-## Existing tests
+We passed 145 test functions locally in macOS Debug, macOS Release, and the iPhone simulator.
+We matched 23,702 positions and 327,848 candidate moves in the expanded independent campaign.
+These finite checks do not prove correctness for every chess position.
+The [validation record](VALIDATION-RESULTS.md) identifies the commands, environment, and limits.
 
-The existing tests use `@testable import ChessKit`.
-These tests can access internal declarations.
-A successful run does not establish that the public API works from an external app.
-We will add an external consumer test before release.
+We maintain user guides and the DocC source catalog in `Documentation/`.
+We exclude the generated API website from version control.
+The [documentation index](README.md) identifies the purpose of each document.
+The [API generation guide](API-DOCUMENTATION.md) describes how we rebuild the reference.
 
-## Generated API pages
+## Remaining release work
 
-We retain the upstream pages in `docs/` as historical reference material.
-Those pages can contain examples that do not compile from an external app.
-We did not regenerate those pages for this documentation update.
-We will check the examples and generate new pages after the public API changes.
-
-## CI
-
-We retain the upstream CI workflow without changes.
-It refers to upstream branches and external coverage configuration.
-We will review that workflow before we enable it for this fork.
-
-## Release publication
-
-We will publish a release after the agreed checks pass.
-We will record the supported toolchains, platforms, and migration steps with that release.
-The [change history](../CHANGELOG.md) will identify the changes in each version.
+We must verify the candidate in a host app and review the required integration changes.
+We must check the remote CI jobs on the exact commit proposed for merge.
+The recorded local results do not establish a passed Xcode 16.4 remote run.
+We must then select the major version, finalize release notes, and publish the tested revision.
+We track these steps in the [work plan](WORK-PLAN.md).
