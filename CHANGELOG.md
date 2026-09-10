@@ -4,7 +4,9 @@
 
 We expose public initializers for `FenSerialization` and `SanSerialization`.
 We add a separate test target that uses only the public API.
-We keep the existing conversion methods and chess rules unchanged.
+We correct en passant simulation so that other pieces do not remove the pawn.
+We include the source file and capture marker in en passant SAN, including captures that give check.
+We add regression tests for both colors and preserve the public method signatures.
 
 ### Fork documentation
 

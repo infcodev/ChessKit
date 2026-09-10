@@ -30,26 +30,28 @@ We will define parser and position checks separately.
 
 ## En passant simulation
 
-We identified a possible defect in the legal move filter.
-The filter can remove a pawn when another piece moves to the en passant square.
-This simulation can hide a check that remains after the actual move.
+We reproduced and corrected a defect in the legal move filter.
+The filter removed a pawn when another piece moved to the en passant square.
+This could accept an illegal move or reject a legal move.
+We now remove the captured pawn in the simulation only when a pawn moves.
 
-We will use this candidate regression case:
+We retain this regression case:
 
 | Field           | Value                                                                   |
 | --------------- | ----------------------------------------------------------------------- |
 | FEN             | `7k/8/8/3p1N2/4K3/8/8/8 w - d6 0 2`                                     |
 | Move            | `f5d6`                                                                  |
 | Expected result | The move is illegal. The pawn on d5 still attacks the white king on e4. |
-| Evidence        | Source review of `StandardRules.squareOfEnPassantCapturedPawn`.         |
-| Test status     | We did not execute this regression case.                                |
+| Evidence        | Executed regression tests for both colors.                             |
+| Test status     | Failed before the correction; passed after the correction.              |
 
 ## SAN output and input
 
-The SAN serializer omits the capture marker for en passant.
-For the capture from e5 to d6, the output must include `exd6`.
-The current code can produce `d6`.
-[Upstream issue 17](https://github.com/aperechnev/ChessKit/issues/17) reports this defect.
+We reproduced and corrected the missing source file and capture marker in en passant SAN.
+The serializer now produces `exd6` for the capture from e5 to d6.
+We test both colors, both capture directions, and captures that give direct or discovered check.
+We confirmed eight SAN failures before the correction.
+[Upstream issue 17](https://github.com/aperechnev/ChessKit/issues/17) reports the original defect.
 
 Our source review also found incomplete SAN disambiguation.
 Some positions require both the source file and the source rank.

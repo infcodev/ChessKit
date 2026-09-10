@@ -11,7 +11,8 @@ We use `main` as the default branch of [our fork](https://github.com/infcodev/Ch
 
 We updated the project documentation and CI configuration.
 We added public serializer initializers and a separate public API test target.
-We kept the existing chess rules and conversion methods unchanged.
+We corrected en passant simulation and SAN capture output.
+We added tests for legal moves, illegal moves, and capture notation.
 We did not publish a new package release.
 The inherited tags identify upstream releases, not our corrections.
 
@@ -20,7 +21,8 @@ The inherited tags identify upstream releases, not our corrections.
 We expose public initializers for the FEN and SAN serializers in the working revision.
 An external app can construct both serializers.
 The README board example remains valid.
-We did not change parser validation or chess rules with this correction.
+We preserved the public method signatures.
+Parser validation and the remaining rule corrections are still pending.
 
 We do not recommend this revision for production use.
 The [known limits](KNOWN-LIMITS.md) record the current findings.

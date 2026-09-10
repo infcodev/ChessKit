@@ -202,6 +202,10 @@ public class StandardRules: Rules {
     }
 
     private func squareOfEnPassantCapturedPawn(move: Move, position: Position) -> Square? {
+        guard position.board[move.from]?.kind == .pawn else {
+            return nil
+        }
+
         guard let enPassant = position.state.enPasant else {
             return nil
         }

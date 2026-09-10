@@ -1,7 +1,8 @@
 # Work plan
 
 We will correct confirmed defects before we add new functions.
-We completed the first API correction in the working revision. The remaining corrections are pending.
+We completed the public API correction and the two en passant corrections in the working revision.
+The remaining corrections are pending.
 The [known limits](KNOWN-LIMITS.md) contain the supporting findings.
 
 ## Delivery order
@@ -26,6 +27,18 @@ We added public initializers for both serializers.
 We added a separate test target for public API consumption.
 We confirmed the access errors before the correction.
 We preserved the parser signatures and conversion behavior.
+
+## Completed en passant corrections
+
+We corrected pawn removal in the legal move simulation.
+We corrected the source file and capture marker in SAN output.
+We confirmed four legal-move failures and eight SAN failures before their corrections.
+We added 22 cases across six parameterized tests, including controls for existing behavior.
+We test both colors, pawn checks, rook checks, captures, and ordinary pawn advances.
+
+We wrote the small test positions for these regressions.
+We use [FIDE Laws of Chess](https://handbook.fide.com/chapter/E012023), articles 3.7.3 and 3.9.2, for the capture and king-safety rules.
+We keep malformed position validation separate from these corrections.
 
 ## Test plan
 

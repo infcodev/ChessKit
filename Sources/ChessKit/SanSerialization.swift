@@ -43,10 +43,17 @@ public class SanSerialization {
     }
 
     private func processPawn(move: Move, in game: Game) -> String {
-        let targetSquare = game.position.board[move.to]
-        var san =
-            targetSquare?.kind != nil
-            ? "\(move.from.coordinate.first!)x\(move.to)" : move.to.coordinate
+        let targetPiece = game.position.board[move.to]
+        let isEnPassant = move.to == game.position.state.enPasant
+        let isCapture = targetPiece != nil || isEnPassant
+
+        var san: String
+        if isCapture {
+            san = "\(move.from.coordinate.first!)x\(move.to)"
+        } else {
+            san = move.to.coordinate
+        }
+
         if let promotion = move.promotion {
             san += "=\(promotion)".uppercased()
         }
