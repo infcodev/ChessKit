@@ -76,6 +76,9 @@ We check a move against `Game.legalMoves` before we call `Game.make`.
 Direct board edits change piece placement without applying game rules.
 We use direct edits for position setup, not for game play.
 
+We read FEN with `try FenSerialization().deserialize(fen:)` and handle `FenSerializationError` in the app.
+The [FEN input guide](Documentation/FEN-INPUT.md) describes accepted input and error handling.
+
 ## Documentation
 
 - [Known limits](Documentation/KNOWN-LIMITS.md): version-specific defects and restrictions.

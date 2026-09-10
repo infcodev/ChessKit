@@ -11,12 +11,12 @@ import Testing
 
 @testable import ChessKit
 
-@Test func game1() {
+@Test func game1() throws {
     let fenSerializator = FenSerialization()
     let moves = "g1h3 c7c6 h3g5 e7e5 g5e4 d7d5 d2d4".split(separator: " ").map { $0.description }
 
     let initialFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    let position = fenSerializator.deserialize(fen: initialFen)
+    let position = try fenSerializator.deserialize(fen: initialFen)
     let game = Game(position: position)
 
     moves.forEach { game.make(move: $0) }
@@ -30,10 +30,10 @@ import Testing
     )
 }
 
-@Test func game2() {
+@Test func game2() throws {
     let fenSerializator = FenSerialization()
     let fen = "8/1p3p1k/4p3/3p4/6p1/1K6/8/2q5 w - - 0 52"
-    let position = fenSerializator.deserialize(fen: fen)
+    let position = try fenSerializator.deserialize(fen: fen)
     let game = Game(position: position)
     let legalMoves = game.legalMoves.map { $0.description }
 

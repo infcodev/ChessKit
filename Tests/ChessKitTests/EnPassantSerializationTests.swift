@@ -18,7 +18,7 @@ import Testing
     ]
 )
 func enPassantSanRoundTrip(fen: String, coordinateMove: String, expectedSan: String) throws {
-    let position = FenSerialization().deserialize(fen: fen)
+    let position = try FenSerialization().deserialize(fen: fen)
     let game = Game(position: position)
     let serializer = SanSerialization()
     let move = Move(string: coordinateMove)
@@ -46,7 +46,7 @@ func enPassantSanRoundTrip(fen: String, coordinateMove: String, expectedSan: Str
     ]
 )
 func pawnSanCaptureControls(fen: String, coordinateMove: String, expectedSan: String) throws {
-    let game = Game(position: FenSerialization().deserialize(fen: fen))
+    let game = try Game(position: FenSerialization().deserialize(fen: fen))
     let move = Move(string: coordinateMove)
 
     try #require(game.legalMoves.contains(move))

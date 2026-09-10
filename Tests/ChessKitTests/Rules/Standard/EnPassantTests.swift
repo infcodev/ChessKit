@@ -8,9 +8,9 @@ import Testing
         ("8/8/8/4k3/3P1n2/8/8/7K b - d3 0 2", "f4d3"),
     ]
 )
-func nonPawnCannotCaptureEnPassant(fen: String, coordinateMove: String) {
+func nonPawnCannotCaptureEnPassant(fen: String, coordinateMove: String) throws {
     let serializer = FenSerialization()
-    let position = serializer.deserialize(fen: fen)
+    let position = try serializer.deserialize(fen: fen)
     let game = Game(position: position)
     let move = Move(string: coordinateMove)
 
@@ -37,7 +37,7 @@ func nonPawnPreservesEnPassantPawn(
     fen: String, coordinateMove: String, expectedFen: String
 ) throws {
     let serializer = FenSerialization()
-    let position = serializer.deserialize(fen: fen)
+    let position = try serializer.deserialize(fen: fen)
     let game = Game(position: position)
     let move = Move(string: coordinateMove)
 
@@ -67,7 +67,7 @@ func enPassantEscapesPawnCheck(
     fen: String, coordinateMove: String, expectedFen: String
 ) throws {
     let serializer = FenSerialization()
-    let game = Game(position: serializer.deserialize(fen: fen))
+    let game = try Game(position: serializer.deserialize(fen: fen))
     let move = Move(string: coordinateMove)
 
     #expect(game.isCheck)
@@ -89,8 +89,8 @@ func enPassantEscapesPawnCheck(
         ("4k3/8/8/8/3Pp3/8/8/K3R3 b - d3 0 2", "e4d3"),
     ]
 )
-func enPassantCannotExposeRookCheck(fen: String, coordinateMove: String) {
-    let position = FenSerialization().deserialize(fen: fen)
+func enPassantCannotExposeRookCheck(fen: String, coordinateMove: String) throws {
+    let position = try FenSerialization().deserialize(fen: fen)
     let game = Game(position: position)
     let move = Move(string: coordinateMove)
 

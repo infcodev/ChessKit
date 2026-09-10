@@ -16,6 +16,16 @@ We add a perft baseline with seven reference positions and 30 count checks.
 We add mate and stalemate controls and root-move diagnostics for count failures.
 We preserve the current rules implementation in this test-only change.
 
+### Incompatible API change: FEN input
+
+We changed `FenSerialization.deserialize(fen:)` to a throwing method.
+We added public `FenSerializationError` cases for each invalid field and the field count.
+We check rank structure, ASCII symbols, castling order, en passant state, and counter bounds.
+We accept surrounding whitespace and normalize leading counter zeros on output.
+We preserve incomplete boards for position editing.
+We added public input tests and updated all existing test consumers to use `try`.
+The [FEN input guide](Documentation/FEN-INPUT.md) describes the migration and validation limits.
+
 ### Fork documentation
 
 We made the README a project guide.

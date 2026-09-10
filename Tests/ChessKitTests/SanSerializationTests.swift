@@ -58,29 +58,31 @@ let testables: [(String, String, String)] = [
 
 // Serialization
 
-func san(for move: String, in fen: String) -> String {
-    let position = FenSerialization().deserialize(fen: fen)
+func san(for move: String, in fen: String) throws -> String {
+    let position = try FenSerialization().deserialize(fen: fen)
     let game = Game(position: position)
     let move = Move(string: move)
     return SanSerialization().san(for: move, in: game)
 }
 
-@Test func testSerialization() {
-    testables.forEach {
-        #expect($0.0 == san(for: $0.1, in: $0.2))
+@Test func testSerialization() throws {
+    for (expectedSan, coordinateMove, fen) in testables {
+        let actualSan = try san(for: coordinateMove, in: fen)
+        #expect(expectedSan == actualSan)
     }
 }
 
 // Deserialization
 
-func move(from san: String, in fen: String) -> String {
-    let position = FenSerialization().deserialize(fen: fen)
+func move(from san: String, in fen: String) throws -> String {
+    let position = try FenSerialization().deserialize(fen: fen)
     let game = Game(position: position)
     return SanSerialization().move(for: san, in: game).description
 }
 
-@Test func testDeserialization() {
-    testables.forEach {
-        #expect($0.1 == move(from: $0.0, in: $0.2))
+@Test func testDeserialization() throws {
+    for (san, expectedMove, fen) in testables {
+        let actualMove = try move(from: san, in: fen)
+        #expect(expectedMove == actualMove)
     }
 }

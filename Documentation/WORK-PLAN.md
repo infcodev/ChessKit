@@ -1,7 +1,7 @@
 # Work plan
 
 We will correct confirmed defects before we add new functions.
-We completed the public API, en passant, and castling corrections described below in the working revision.
+We completed the serializer access, en passant, castling, and FEN input corrections described below in the working revision.
 The remaining corrections are pending.
 The [known limits](KNOWN-LIMITS.md) contain the supporting findings.
 
@@ -26,7 +26,8 @@ We will keep position editing separate from legal move generation.
 We added public initializers for both serializers.
 We added a separate test target for public API consumption.
 We confirmed the access errors before the correction.
-We preserved the parser signatures and conversion behavior.
+That access correction preserved the parser signatures and conversion behavior.
+The later FEN input correction changes its parser signature, as documented below.
 
 ## Completed en passant corrections
 
@@ -59,6 +60,18 @@ We compare the results at every depth through each position's stated maximum.
 We preserve the starting position, history, and repetition counter during traversal.
 We report counts per root move when a result differs.
 The [perft notes](PERFT.md) record data attribution, commands, and validation limits.
+
+## Completed FEN input contract
+
+We added the public `FenSerializationError` type before changing the parser signature.
+We made `deserialize(fen:)` throw recoverable errors for invalid fields.
+We reproduced eight invalid active-color cases before the correction.
+We added public consumer tests for malformed records and accepted input boundaries.
+
+We preserve incomplete positions for editing and keep game-state legality separate.
+The [FEN input guide](FEN-INPUT.md) records the contract, migration, and validation limits.
+SAN and coordinate-move input checks remain pending.
+That work must also address counter overflow when a move follows an imported position.
 
 ## Test plan
 

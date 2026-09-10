@@ -16,7 +16,12 @@ We added the initializers and our own public API regression tests.
 
 ## Invalid input
 
-The FEN, SAN, and move parsers assume valid input in several locations.
+We corrected FEN format handling in the working revision.
+`FenSerialization.deserialize(fen:)` now throws `FenSerializationError` for invalid fields.
+We check all six fields before returning a position.
+The [FEN input guide](FEN-INPUT.md) records the accepted format and the required `try` migration.
+
+The SAN and coordinate-move parsers still assume valid input in several locations.
 Invalid input can cause an index error, a failed forced unwrap, or a failed precondition.
 These failures can stop the app instead of returning an error.
 
@@ -24,8 +29,13 @@ These failures can stop the app instead of returning an error.
 A consumer must check a move before it calls this method.
 This check still depends on the correctness of the legal move generator.
 
-We will define parser and position checks separately.
+We keep parser and position checks separate.
+FEN parsing still accepts incomplete boards for position editing.
 The castling checks below do not validate a complete imported position.
+
+FEN counters accept values through `Int.max` for storage and serialization.
+`Game.make` can overflow when it increments a counter at that limit.
+We will address counter arithmetic with the remaining move-input work.
 
 ## Castling
 

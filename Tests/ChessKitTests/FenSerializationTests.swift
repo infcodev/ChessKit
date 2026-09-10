@@ -20,8 +20,8 @@ import Testing
         "rnbqkbnr/pp2pppp/8/2ppP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3",
         "8/8/8/8/4K3/8/8/8 w - - 0 1",
     ])
-func serialization(fen: String) {
+func serialization(fen: String) throws {
     let serializator = FenSerialization()
-    let position = serializator.deserialize(fen: fen)
+    let position = try serializator.deserialize(fen: fen)
     #expect(fen == serializator.serialize(position: position))
 }

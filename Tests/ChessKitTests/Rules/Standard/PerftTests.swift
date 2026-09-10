@@ -43,8 +43,8 @@ import Testing
         ),
     ]
 )
-func standardPerft(name: String, fen: String, expectedCounts: [Int]) {
-    let position = FenSerialization().deserialize(fen: fen)
+func standardPerft(name: String, fen: String, expectedCounts: [Int]) throws {
+    let position = try FenSerialization().deserialize(fen: fen)
     let game = Game(position: position)
     let initialOccurrences = game.positionsCounter
 
@@ -70,8 +70,8 @@ func standardPerft(name: String, fen: String, expectedCounts: [Int]) {
         ("Stalemate", "7k/5K2/6Q1/8/8/8/8/8 b - - 0 1", false),
     ]
 )
-func terminalPerft(name: String, fen: String, expectedCheck: Bool) {
-    let game = Game(position: FenSerialization().deserialize(fen: fen))
+func terminalPerft(name: String, fen: String, expectedCheck: Bool) throws {
+    let game = try Game(position: FenSerialization().deserialize(fen: fen))
 
     #expect(game.isCheck == expectedCheck, "\(name)")
     #expect(game.legalMoves.isEmpty, "\(name)")

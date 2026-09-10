@@ -40,8 +40,8 @@ import Testing
         ("r3k2r/8/8/8/8/8/8/4K3 b - - 0 1", "e8c8"),
     ]
 )
-func castlingRequiresStartingPiecesAndRights(fen: String, coordinateMove: String) {
-    let position = FenSerialization().deserialize(fen: fen)
+func castlingRequiresStartingPiecesAndRights(fen: String, coordinateMove: String) throws {
+    let position = try FenSerialization().deserialize(fen: fen)
     let game = Game(position: position)
 
     #expect(!game.legalMoves.contains(Move(string: coordinateMove)))
@@ -63,8 +63,8 @@ func castlingRequiresStartingPiecesAndRights(fen: String, coordinateMove: String
         ("r2qk3/8/8/8/8/8/8/4K3 b q - 0 1", "e8c8"),
     ]
 )
-func castlingRequiresClearPath(fen: String, coordinateMove: String) {
-    let game = Game(position: FenSerialization().deserialize(fen: fen))
+func castlingRequiresClearPath(fen: String, coordinateMove: String) throws {
+    let game = try Game(position: FenSerialization().deserialize(fen: fen))
 
     #expect(!game.legalMoves.contains(Move(string: coordinateMove)))
 }
@@ -100,8 +100,8 @@ func castlingRequiresClearPath(fen: String, coordinateMove: String) {
         ("r3k2r/4K3/8/8/8/8/8/8 b kq - 0 1", ""),
     ]
 )
-func castlingRespectsAttackedSquares(fen: String, expectedMoves: String) {
-    let position = FenSerialization().deserialize(fen: fen)
+func castlingRespectsAttackedSquares(fen: String, expectedMoves: String) throws {
+    let position = try FenSerialization().deserialize(fen: fen)
     let game = Game(position: position)
     let kingSquare = Square(file: 4, rank: position.state.turn == .white ? 0 : 7)
     let castlings = game.legalMoves.filter {
@@ -124,8 +124,8 @@ func castlingRespectsAttackedSquares(fen: String, expectedMoves: String) {
         ("r3k3/8/8/8/8/8/8/1R2K3 b q - 0 1", "e8c8"),
     ]
 )
-func castlingAllowsAttackedRookAndOutsideSquare(fen: String, coordinateMove: String) {
-    let game = Game(position: FenSerialization().deserialize(fen: fen))
+func castlingAllowsAttackedRookAndOutsideSquare(fen: String, coordinateMove: String) throws {
+    let game = try Game(position: FenSerialization().deserialize(fen: fen))
 
     #expect(game.legalMoves.contains(Move(string: coordinateMove)))
 }
@@ -156,7 +156,7 @@ func castlingUpdatesPositionAndNotation(
 ) throws {
     let fenSerializer = FenSerialization()
     let sanSerializer = SanSerialization()
-    let position = fenSerializer.deserialize(fen: fen)
+    let position = try fenSerializer.deserialize(fen: fen)
     let game = Game(position: position)
     let move = Move(string: coordinateMove)
 

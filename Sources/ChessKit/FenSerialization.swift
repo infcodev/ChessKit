@@ -13,30 +13,36 @@ public class FenSerialization {
     /// Creates a serializer for use by the calling app.
     public init() {}
 
-    /**
-     Deserialize position from given FEN string.
-    
-     - Parameters:
-        - fen: String containing FEN position.
-    
-     - Returns: `Position` object initialized from given FEN string.
-     */
-    public func deserialize(fen: String) -> Position {
-        let parts = fen.split(separator: " ")
+    /// Reads a position from six FEN fields separated by whitespace.
+    ///
+    /// This method checks the format, not whether a legal game can reach the position.
+    /// Incomplete boards remain available for position editing.
+    ///
+    /// - Parameter fen: A FEN record. Castling letters must use `KQkq` order.
+    /// - Returns: The position described by the record.
+    /// - Throws: `FenSerializationError` for the first invalid field, from left to right.
+    public func deserialize(fen: String) throws -> Position {
+        let fields = fen.split(whereSeparator: { $0.isWhitespace })
 
-        let state = Position.State(
-            turn: self.turn(from: parts[1]),
-            castlings: self.castlings(from: parts[2]),
-            enPasant: self.enPasant(from: parts[3]))
+        guard fields.count == 6 else {
+            throw FenSerializationError.invalidFieldCount(actual: fields.count)
+        }
 
-        let counter = Position.Counter(
-            halfMoves: self.movesCount(from: parts[4]),
-            fullMoves: self.movesCount(from: parts[5]))
+        let board = try self.board(from: fields[0])
+        let turn = try self.turn(from: fields[1])
+        let castlings = try self.castlings(from: fields[2])
+        let enPassant = try self.enPassant(from: fields[3], turn: turn)
+        let halfMoves = try self.moveCount(
+            from: fields[4], minimum: 0, error: .invalidHalfmoveClock
+        )
+        let fullMoves = try self.moveCount(
+            from: fields[5], minimum: 1, error: .invalidFullmoveNumber
+        )
 
-        return Position(
-            board: self.board(from: parts[0]),
-            state: state,
-            counter: counter)
+        let state = Position.State(turn: turn, castlings: castlings, enPasant: enPassant)
+        let counter = Position.Counter(halfMoves: halfMoves, fullMoves: fullMoves)
+
+        return Position(board: board, state: state, counter: counter)
     }
 
     /**
@@ -103,45 +109,124 @@ public class FenSerialization {
 
     // MARK: Deserialization
 
-    private func board(from sequence: String.SubSequence) -> Board {
-        var board = Board()
-        var square = Square(file: 0, rank: 7)
+    private func board(from sequence: Substring) throws -> Board {
+        let ranks = sequence.split(separator: "/", omittingEmptySubsequences: false)
 
-        for c in sequence {
-            if let piece = Piece(character: c) {
-                board[square] = piece
-                square = square.translate(file: 1, rank: 0)
-            } else if c == "/" {
-                square = Square(file: 0, rank: square.rank - 1)
-            } else if let n = c.wholeNumberValue {
-                square = square.translate(file: n, rank: 0)
-            } else {
-                preconditionFailure("Can't parse board position from FEN string.")
-            }
+        guard ranks.count == 8 else {
+            throw FenSerializationError.invalidPiecePlacement
+        }
+
+        var board = Board()
+
+        for (offset, sequence) in ranks.enumerated() {
+            try self.readRank(sequence, rank: 7 - offset, into: &board)
         }
 
         return board
     }
 
-    private func turn(from sequence: String.SubSequence) -> PieceColor {
-        return sequence.lowercased() == "b" ? .black : .white
+    private func readRank(_ sequence: Substring, rank: Int, into board: inout Board) throws {
+        var file = 0
+        var previousWasDigit = false
+
+        for symbol in sequence {
+            guard file < 8 else {
+                throw FenSerializationError.invalidPiecePlacement
+            }
+
+            if let ascii = symbol.asciiValue, (49...56).contains(ascii) {
+                guard !previousWasDigit else {
+                    throw FenSerializationError.invalidPiecePlacement
+                }
+
+                file += Int(ascii - 48)
+                previousWasDigit = true
+                continue
+            }
+
+            guard symbol.asciiValue != nil, let piece = Piece(character: symbol) else {
+                throw FenSerializationError.invalidPiecePlacement
+            }
+
+            board[Square(file: file, rank: rank)] = piece
+            file += 1
+            previousWasDigit = false
+        }
+
+        guard file == 8 else {
+            throw FenSerializationError.invalidPiecePlacement
+        }
     }
 
-    private func castlings(from sequence: String.SubSequence) -> [Piece] {
+    private func turn(from sequence: Substring) throws -> PieceColor {
+        switch sequence {
+        case "w":
+            return .white
+        case "b":
+            return .black
+        default:
+            throw FenSerializationError.invalidActiveColor
+        }
+    }
+
+    private func castlings(from sequence: Substring) throws -> [Piece] {
         if sequence == "-" {
             return []
         }
-        return sequence.map { Piece(character: $0)! }
-    }
 
-    private func enPasant(from sequence: String.SubSequence) -> Square? {
-        return sequence == "-" ? nil : Square(coordinate: String(sequence))
-    }
+        let order: [Character] = ["K", "Q", "k", "q"]
+        var previousIndex = -1
+        var rights: [Piece] = []
 
-    private func movesCount(from sequence: String.SubSequence) -> Int {
-        guard let count = Int(String(sequence)) else {
-            preconditionFailure("Can't parse moves count from sequence.")
+        for symbol in sequence {
+            guard symbol.asciiValue != nil,
+                let index = order.firstIndex(of: symbol), index > previousIndex
+            else {
+                throw FenSerializationError.invalidCastlingRights
+            }
+
+            guard let piece = Piece(character: symbol) else {
+                throw FenSerializationError.invalidCastlingRights
+            }
+
+            rights.append(piece)
+            previousIndex = index
         }
+
+        return rights
+    }
+
+    private func enPassant(from sequence: Substring, turn: PieceColor) throws -> Square? {
+        if sequence == "-" {
+            return nil
+        }
+
+        guard sequence.count == 2, let file = sequence.first, "abcdefgh".contains(file) else {
+            throw FenSerializationError.invalidEnPassantTarget
+        }
+
+        let expectedRank: Character = turn == .white ? "6" : "3"
+
+        guard sequence.last == expectedRank else {
+            throw FenSerializationError.invalidEnPassantTarget
+        }
+
+        return Square(coordinate: String(sequence))
+    }
+
+    private func moveCount(
+        from sequence: Substring, minimum: Int, error: FenSerializationError
+    ) throws -> Int {
+        let containsOnlyDigits = sequence.utf8.allSatisfy { (48...57).contains($0) }
+
+        guard !sequence.isEmpty, containsOnlyDigits else {
+            throw error
+        }
+
+        guard let count = Int(sequence), count >= minimum else {
+            throw error
+        }
+
         return count
     }
 
