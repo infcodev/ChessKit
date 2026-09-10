@@ -45,6 +45,8 @@ For public API changes, we require a consumer test without `@testable`.
 
 We run CI for pushes to `main` and pull requests to `main`.
 We also support manual runs after the workflow is available on `main`.
+We open pull requests against `main` to check changes on a feature branch.
+We check both CI jobs before we merge a pull request.
 We use the `macos-15` runner with Xcode 16.4.
 We run the test suite with coverage and build the package for the iOS Simulator.
 We keep the coverage report as a GitHub artifact for 14 days.
