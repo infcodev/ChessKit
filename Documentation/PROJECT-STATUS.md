@@ -33,7 +33,8 @@ We matched 23,702 positions and 327,848 candidate moves in the expanded independ
 These finite checks do not prove correctness for every chess position.
 The [validation record](VALIDATION-RESULTS.md) identifies the commands, environment, and limits.
 
-We maintain user guides in `Documentation/` and generate the API reference in `docs/`.
+We maintain user guides and the DocC source catalog in `Documentation/`.
+We exclude the generated API website from version control.
 The [documentation index](README.md) identifies the purpose of each document.
 The [API generation guide](API-DOCUMENTATION.md) describes how we rebuild the reference.
 

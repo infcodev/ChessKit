@@ -91,7 +91,7 @@ The [moves and SAN guide](Documentation/MOVES-AND-SAN.md) describes move parsing
 We use the [documentation index](Documentation/README.md) to separate current contracts, delivery work, and historical evidence.
 
 - [Migration](Documentation/MIGRATION.md): consumer changes from upstream 2.0.0.
-- [API reference](docs/documentation/chesskit/index.html): generated public declarations.
+- [API documentation](Documentation/API-DOCUMENTATION.md): optional generation from the public declarations.
 
 - [Known limits](Documentation/KNOWN-LIMITS.md): current restrictions and verification limits.
 - [Project status](Documentation/PROJECT-STATUS.md): baseline, candidate, and release state.

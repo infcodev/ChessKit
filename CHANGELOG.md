@@ -43,7 +43,8 @@ The [migration guide](Documentation/MIGRATION.md) lists the required consumer ch
 
 We keep the README as the project guide and centralize incompatible changes in the migration guide.
 We separate current limits, remaining work, historical corrections, and dated validation evidence.
-We regenerate the API reference from the corrected public declarations.
+We retain the DocC source catalog and optional generation instructions.
+We remove the generated API website from version control and ignore local build, test, and cache artifacts.
 We retain the upstream license, attribution, and original release notes.
 
 ## Upstream release history
