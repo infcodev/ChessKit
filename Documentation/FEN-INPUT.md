@@ -76,9 +76,9 @@ We accept empty boards, missing kings, and castling rights without the starting 
 We preserve an en passant target without requiring a capturing pawn.
 We keep these controls separate so that position editing remains possible.
 
-We do not change move generation, `Game.make`, or counter arithmetic in this correction.
-A counter at `Int.max` can be read and written, but a later increment can overflow in `Game.make`.
-We track that limit with the remaining move-input work.
+We accept counters through `Int.max` for storage and serialization.
+The later [move-input correction](MOVES-AND-SAN.md) rejects overflowing game updates with a recoverable error.
+SAN inspection does not increment those counters.
 A valid FEN format alone does not guarantee safe game play from an arbitrary edited position.
 
 ## Verification

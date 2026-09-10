@@ -23,10 +23,10 @@ func publicSanSerialization(san: String, coordinateMove: String) throws {
     let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     let position = try fenSerializer.deserialize(fen: fen)
     let game = Game(position: position)
-    let expectedMove = Move(string: coordinateMove)
+    let expectedMove = try Move(string: coordinateMove)
 
-    let move = sanSerializer.move(for: san, in: game)
-    let serialized = sanSerializer.san(for: expectedMove, in: game)
+    let move = try sanSerializer.move(for: san, in: game)
+    let serialized = try sanSerializer.san(for: expectedMove, in: game)
 
     #expect(move == expectedMove)
     #expect(serialized == san)

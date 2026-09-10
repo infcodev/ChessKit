@@ -34,26 +34,50 @@ public struct Move: CustomStringConvertible, Hashable {
         self.promotion = promotion
     }
 
-    /**
-     Initialize move with human readable string.
-    
-     - Parameters:
-        - string: Move string in human readable format (e.g., `"g1f3"`, `"e7e8Q"`).
-     */
-    public init(string: String) {
-        let fromIndex = string.index(string.startIndex, offsetBy: 2)
-        let fromString = string[..<fromIndex].description
-        self.from = Square(coordinate: fromString)
+    /// Reads four ASCII coordinate characters and an optional promotion letter.
+    ///
+    /// Promotion letters are `q`, `r`, `b`, or `n`, in either case.
+    /// This initializer checks notation. `Game.make` checks legality in a position.
+    /// - Throws: `MoveParsingError` when the coordinate input is invalid.
+    public init(string: String) throws {
+        let bytes = Array(string.utf8)
 
-        let toIndex = string.index(string.startIndex, offsetBy: 4)
-        let toString = string[fromIndex..<toIndex].description
-        self.to = Square(coordinate: toString)
-
-        if let promotionCharacter = string.last {
-            self.promotion = Piece(character: promotionCharacter)?.kind
-        } else {
-            self.promotion = nil
+        guard bytes.count == 4 || bytes.count == 5 else {
+            throw MoveParsingError.invalidLength
         }
+
+        guard (97...104).contains(bytes[0]), (49...56).contains(bytes[1]) else {
+            throw MoveParsingError.invalidSourceSquare
+        }
+
+        guard (97...104).contains(bytes[2]), (49...56).contains(bytes[3]) else {
+            throw MoveParsingError.invalidDestinationSquare
+        }
+
+        let from = Square(file: Int(bytes[0] - 97), rank: Int(bytes[1] - 49))
+        let to = Square(file: Int(bytes[2] - 97), rank: Int(bytes[3] - 49))
+
+        guard from != to else {
+            throw MoveParsingError.identicalSquares
+        }
+
+        var promotion: PieceKind?
+        if bytes.count == 5 {
+            switch bytes[4] {
+            case 81, 113:
+                promotion = .queen
+            case 82, 114:
+                promotion = .rook
+            case 66, 98:
+                promotion = .bishop
+            case 78, 110:
+                promotion = .knight
+            default:
+                throw MoveParsingError.invalidPromotion
+            }
+        }
+
+        self.init(from: from, to: to, promotion: promotion)
     }
 
     // MARK: CustomStringConvertible

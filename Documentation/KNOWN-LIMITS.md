@@ -21,21 +21,15 @@ We corrected FEN format handling in the working revision.
 We check all six fields before returning a position.
 The [FEN input guide](FEN-INPUT.md) records the accepted format and the required `try` migration.
 
-The SAN and coordinate-move parsers still assume valid input in several locations.
-Invalid input can cause an index error, a failed forced unwrap, or a failed precondition.
-These failures can stop the app instead of returning an error.
-
-`Game.make` applies a move without a legal move check.
-A consumer must check a move before it calls this method.
-This check still depends on the correctness of the legal move generator.
+We added recoverable coordinate-move and SAN errors in the working revision.
+`Game.make` now checks legality and calculates all updates before it changes the game.
+Counter overflow returns an error without modifying the position, history, or occurrence counts.
+The [moves and SAN guide](MOVES-AND-SAN.md) records the accepted input and required API migration.
 
 We keep parser and position checks separate.
 FEN parsing still accepts incomplete boards for position editing.
-The castling checks below do not validate a complete imported position.
-
-FEN counters accept values through `Int.max` for storage and serialization.
-`Game.make` can overflow when it increments a counter at that limit.
-We will address counter arithmetic with the remaining move-input work.
+The legality checks depend on the move generator and do not validate arbitrary direct board or square edits.
+We have not established that an edited position is reachable from legal play.
 
 ## Castling
 
@@ -75,11 +69,12 @@ We test both colors, both capture directions, and captures that give direct or d
 We confirmed eight SAN failures before the correction.
 [Upstream issue 17](https://github.com/aperechnev/ChessKit/issues/17) reports the original defect.
 
-Our source review also found incomplete SAN disambiguation.
-Some positions require both the source file and the source rank.
-The current output logic does not handle that combination.
-The input parser can select the first candidate without checking that it is unique.
-We will add regression cases for both conditions.
+We reproduced and corrected incomplete source-square disambiguation.
+We now write both the file and rank when neither alone identifies the moving piece.
+We require a unique legal match when reading SAN.
+We verify supplied capture, promotion, castling, and check details.
+SAN inspection no longer advances counters on a game copy.
+The [moves and SAN guide](MOVES-AND-SAN.md) describes accepted import alternatives and rejected annotations.
 
 ## Repetition and game results
 

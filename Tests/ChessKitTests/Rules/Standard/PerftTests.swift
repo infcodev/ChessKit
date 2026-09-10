@@ -49,11 +49,11 @@ func standardPerft(name: String, fen: String, expectedCounts: [Int]) throws {
     let initialOccurrences = game.positionsCounter
 
     for (depth, expected) in expectedCounts.enumerated() {
-        let actual = perftNodes(in: game, depth: depth)
+        let actual = try perftNodes(in: game, depth: depth)
         let context = "\(name), depth \(depth), FEN: \(fen)"
 
         if actual != expected {
-            let branches = perftDivide(in: game, depth: depth)
+            let branches = try perftDivide(in: game, depth: depth)
             Issue.record("\(context): expected \(expected), got \(actual). Root branches: \(branches)")
         }
 
@@ -75,12 +75,12 @@ func terminalPerft(name: String, fen: String, expectedCheck: Bool) throws {
 
     #expect(game.isCheck == expectedCheck, "\(name)")
     #expect(game.legalMoves.isEmpty, "\(name)")
-    #expect(perftNodes(in: game, depth: 0) == 1)
-    #expect(perftNodes(in: game, depth: 1) == 0)
-    #expect(perftNodes(in: game, depth: 2) == 0)
+    #expect(try perftNodes(in: game, depth: 0) == 1)
+    #expect(try perftNodes(in: game, depth: 1) == 0)
+    #expect(try perftNodes(in: game, depth: 2) == 0)
 }
 
-private func perftNodes(in game: Game, depth: Int) -> Int {
+private func perftNodes(in game: Game, depth: Int) throws -> Int {
     if depth == 0 {
         return 1
     }
@@ -93,22 +93,22 @@ private func perftNodes(in game: Game, depth: Int) -> Int {
     var count = 0
     for move in moves {
         let child = game.deepCopy()
-        child.make(move: move)
-        count += perftNodes(in: child, depth: depth - 1)
+        try child.make(move: move)
+        count += try perftNodes(in: child, depth: depth - 1)
     }
 
     return count
 }
 
-private func perftDivide(in game: Game, depth: Int) -> String {
+private func perftDivide(in game: Game, depth: Int) throws -> String {
     guard depth > 0 else {
         return "depth zero"
     }
 
-    return game.legalMoves.sorted { $0.description < $1.description }.map { move in
+    return try game.legalMoves.sorted { $0.description < $1.description }.map { move in
         let child = game.deepCopy()
-        child.make(move: move)
-        let count = perftNodes(in: child, depth: depth - 1)
+        try child.make(move: move)
+        let count = try perftNodes(in: child, depth: depth - 1)
         return "\(move): \(count)"
     }.joined(separator: ", ")
 }

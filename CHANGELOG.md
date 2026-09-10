@@ -26,6 +26,17 @@ We preserve incomplete boards for position editing.
 We added public input tests and updated all existing test consumers to use `try`.
 The [FEN input guide](Documentation/FEN-INPUT.md) describes the migration and validation limits.
 
+### Incompatible API change: moves and SAN
+
+We changed `Move.init(string:)`, both `Game.make` overloads, and both SAN conversion methods to throwing operations.
+We added `MoveParsingError`, `GameMoveError`, and `SanSerializationError`.
+We reject malformed coordinate and SAN input, illegal moves, ambiguous SAN, and incorrect check suffixes.
+We corrected SAN output when disambiguation requires the full source square.
+We calculate counter updates before modifying the game and reject overflow without partial changes.
+We share board effects between game updates and SAN inspection; notation does not advance counters.
+We added public regressions and preserved the existing rule and perft checks.
+The [moves and SAN guide](Documentation/MOVES-AND-SAN.md) describes the migration and remaining limits.
+
 ### Fork documentation
 
 We made the README a project guide.

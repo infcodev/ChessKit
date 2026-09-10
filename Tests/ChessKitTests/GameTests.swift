@@ -17,10 +17,10 @@ import Testing
     let position = try fenSerializator.deserialize(fen: fen)
     let game = Game(position: position)
 
-    let moves = ["e2e4", "e7e5", "g1f3", "b8c6", "d2d4", "e5d4"]
-        .map { Move(string: $0) }
+    let moves = try ["e2e4", "e7e5", "g1f3", "b8c6", "d2d4", "e5d4"]
+        .map { try Move(string: $0) }
 
-    moves.forEach { game.make(move: $0) }
+    try moves.forEach { try game.make(move: $0) }
 
     #expect(moves == game.movesHistory)
 
@@ -38,16 +38,16 @@ import Testing
 
     #expect(game.positionsCounter[game.position.board] == 1)
 
-    game.make(move: "b8a8")
-    game.make(move: "g4f3")
-    game.make(move: "a8b8")
-    game.make(move: "f3g4")
+    try game.make(move: "b8a8")
+    try game.make(move: "g4f3")
+    try game.make(move: "a8b8")
+    try game.make(move: "f3g4")
     #expect(game.positionsCounter[game.position.board] == 2)
 
-    game.make(move: "b8a8")
-    game.make(move: "g4f3")
-    game.make(move: "a8b8")
-    game.make(move: "f3g4")
+    try game.make(move: "b8a8")
+    try game.make(move: "g4f3")
+    try game.make(move: "a8b8")
+    try game.make(move: "f3g4")
     #expect(game.positionsCounter[game.position.board] == 3)
 }
 
@@ -58,19 +58,19 @@ import Testing
     let rules = StandardRules()
     let game = Game(position: position, rules: rules)
 
-    game.make(move: "e2e4")
+    try game.make(move: "e2e4")
     #expect(game.position.board["e4"] == Piece(kind: .pawn, color: .white))
     #expect(game.position.board["e2"] == nil)
     #expect(game.position.state.turn == PieceColor.black)
     #expect(game.position.state.enPasant == Square(coordinate: "e3"))
     #expect(game.position.counter.fullMoves == 1)
 
-    game.make(move: "d7d5")
+    try game.make(move: "d7d5")
     #expect(game.position.state.turn == PieceColor.white)
     #expect(game.position.state.enPasant == Square(coordinate: "d6"))
     #expect(game.position.counter.fullMoves == 2)
 
-    game.make(move: "g1f3")
+    try game.make(move: "g1f3")
     #expect(game.position.state.enPasant == nil)
     #expect(game.position.counter.halfMoves == 1)
 }
@@ -84,7 +84,7 @@ import Testing
 
     #expect(game.position.state.castlings.contains(Piece(kind: .king, color: .white)) == true)
 
-    game.make(move: "h1g1")
+    try game.make(move: "h1g1")
     #expect(game.position.state.castlings.contains(Piece(kind: .king, color: .white)) == false)
 }
 
@@ -97,7 +97,7 @@ import Testing
 
     #expect(game.position.state.castlings.contains(Piece(kind: .queen, color: .white)) == true)
 
-    game.make(move: "a1b1")
+    try game.make(move: "a1b1")
     #expect(game.position.state.castlings.contains(Piece(kind: .queen, color: .white)) == false)
 }
 
@@ -111,7 +111,7 @@ import Testing
     #expect(game.position.state.castlings.contains(Piece(kind: .queen, color: .white)) == true)
     #expect(game.position.state.castlings.contains(Piece(kind: .king, color: .white)) == true)
 
-    game.make(move: "e1e2")
+    try game.make(move: "e1e2")
     #expect(game.position.state.castlings.contains(Piece(kind: .queen, color: .white)) == false)
     #expect(game.position.state.castlings.contains(Piece(kind: .king, color: .white)) == false)
 }
@@ -123,7 +123,7 @@ import Testing
     let rules = StandardRules()
     let game = Game(position: position, rules: rules)
 
-    game.make(move: "e1g1")
+    try game.make(move: "e1g1")
 
     #expect(game.position.board["e1"] == nil)
     #expect(game.position.board["f1"] == Piece(kind: .rook, color: .white))
@@ -138,7 +138,7 @@ import Testing
     let rules = StandardRules()
     let game = Game(position: position, rules: rules)
 
-    game.make(move: "e1c1")
+    try game.make(move: "e1c1")
 
     #expect(game.position.board["a1"] == nil)
     #expect(game.position.board["b1"] == nil)
@@ -154,14 +154,14 @@ import Testing
     let rules = StandardRules()
     let game = Game(position: position, rules: rules)
 
-    game.make(move: "b4c3")
+    try game.make(move: "b4c3")
     #expect(game.position.board["b4"] == nil)
     #expect(game.position.board["c4"] == nil)
     #expect(game.position.board["c3"] == Piece(kind: .pawn, color: .black))
 
-    game.make(move: "d2c3")
-    game.make(move: "f7f5")
-    game.make(move: "g5f6")
+    try game.make(move: "d2c3")
+    try game.make(move: "f7f5")
+    try game.make(move: "g5f6")
     #expect(game.position.board["g5"] == nil)
     #expect(game.position.board["f5"] == nil)
     #expect(game.position.board["f6"] == Piece(kind: .pawn, color: .white))
@@ -173,7 +173,7 @@ import Testing
     let position = try fenSerializator.deserialize(fen: fen)
     let game = Game(position: position)
 
-    game.make(move: "g2g1q")
+    try game.make(move: "g2g1q")
     let finalFen = fenSerializator.serialize(position: game.position)
 
     #expect(finalFen == "8/1p3ppk/4p3/3p4/1p6/1K6/8/6q1 w - - 0 49")

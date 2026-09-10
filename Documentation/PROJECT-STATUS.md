@@ -26,7 +26,10 @@ The README board example remains valid.
 We changed `FenSerialization.deserialize(fen:)` to throw recoverable errors for invalid FEN fields.
 Consumers must add `try` and handle or propagate `FenSerializationError`.
 The [FEN input guide](FEN-INPUT.md) describes this incompatible API change.
-SAN and coordinate-move validation and the remaining rule corrections are still pending.
+We also changed coordinate parsing, both `Game.make` overloads, and SAN input and output to throwing methods.
+We validate moves and reject counter overflow before modifying game state.
+The [moves and SAN guide](MOVES-AND-SAN.md) describes these API changes.
+Position identity and complete game results remain pending.
 
 We do not recommend this revision for production use.
 The [known limits](KNOWN-LIMITS.md) record the current findings.
@@ -38,7 +41,9 @@ The original tests use `@testable import ChessKit` and can access internal decla
 We added `ChessKitPublicAPITests` as a separate test target with a plain `import ChessKit`.
 We test serializer construction, a FEN round trip, and SAN input and output for pawn and knight moves.
 We extended this target with FEN errors, input boundaries, and recovery after failure.
-These tests do not establish complete SAN validation or position legality.
+We added coordinate and SAN input tests, promotion and ambiguity cases, and atomic game-update checks.
+We test SAN inspection with extreme counters and game updates at their storage bounds.
+These tests do not establish complete position legality.
 
 We added a perft baseline with 30 published count checks and terminal-position controls.
 We include these checks in the normal test suite.

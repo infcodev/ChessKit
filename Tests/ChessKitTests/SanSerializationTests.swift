@@ -61,8 +61,8 @@ let testables: [(String, String, String)] = [
 func san(for move: String, in fen: String) throws -> String {
     let position = try FenSerialization().deserialize(fen: fen)
     let game = Game(position: position)
-    let move = Move(string: move)
-    return SanSerialization().san(for: move, in: game)
+    let move = try Move(string: move)
+    return try SanSerialization().san(for: move, in: game)
 }
 
 @Test func testSerialization() throws {
@@ -77,7 +77,7 @@ func san(for move: String, in fen: String) throws -> String {
 func move(from san: String, in fen: String) throws -> String {
     let position = try FenSerialization().deserialize(fen: fen)
     let game = Game(position: position)
-    return SanSerialization().move(for: san, in: game).description
+    return try SanSerialization().move(for: san, in: game).description
 }
 
 @Test func testDeserialization() throws {

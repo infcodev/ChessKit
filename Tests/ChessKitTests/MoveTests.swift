@@ -24,7 +24,7 @@ import Testing
     )
 }
 
-@Test func initWithString() {
-    #expect(Move(string: "e2e4").description == "e2e4")
-    #expect(Move(string: "f7f8r").description == "f7f8r")
+@Test func initWithString() throws {
+    #expect(try Move(string: "e2e4").description == "e2e4")
+    #expect(try Move(string: "f7f8r").description == "f7f8r")
 }

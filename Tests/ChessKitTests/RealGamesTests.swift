@@ -19,7 +19,7 @@ import Testing
     let position = try fenSerializator.deserialize(fen: initialFen)
     let game = Game(position: position)
 
-    moves.forEach { game.make(move: $0) }
+    try moves.forEach { try game.make(move: $0) }
 
     let finalFen = fenSerializator.serialize(position: game.position)
     #expect(

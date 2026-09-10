@@ -44,7 +44,7 @@ func castlingRequiresStartingPiecesAndRights(fen: String, coordinateMove: String
     let position = try FenSerialization().deserialize(fen: fen)
     let game = Game(position: position)
 
-    #expect(!game.legalMoves.contains(Move(string: coordinateMove)))
+    #expect(try !game.legalMoves.contains(Move(string: coordinateMove)))
     #expect(game.position == position)
 }
 
@@ -66,7 +66,7 @@ func castlingRequiresStartingPiecesAndRights(fen: String, coordinateMove: String
 func castlingRequiresClearPath(fen: String, coordinateMove: String) throws {
     let game = try Game(position: FenSerialization().deserialize(fen: fen))
 
-    #expect(!game.legalMoves.contains(Move(string: coordinateMove)))
+    #expect(try !game.legalMoves.contains(Move(string: coordinateMove)))
 }
 
 @Test(
@@ -127,7 +127,7 @@ func castlingRespectsAttackedSquares(fen: String, expectedMoves: String) throws 
 func castlingAllowsAttackedRookAndOutsideSquare(fen: String, coordinateMove: String) throws {
     let game = try Game(position: FenSerialization().deserialize(fen: fen))
 
-    #expect(game.legalMoves.contains(Move(string: coordinateMove)))
+    #expect(try game.legalMoves.contains(Move(string: coordinateMove)))
 }
 
 @Test(
@@ -158,14 +158,14 @@ func castlingUpdatesPositionAndNotation(
     let sanSerializer = SanSerialization()
     let position = try fenSerializer.deserialize(fen: fen)
     let game = Game(position: position)
-    let move = Move(string: coordinateMove)
+    let move = try Move(string: coordinateMove)
 
     try #require(game.legalMoves.contains(move))
-    #expect(sanSerializer.san(for: move, in: game) == expectedSan)
-    #expect(sanSerializer.move(for: expectedSan, in: game) == move)
+    #expect(try sanSerializer.san(for: move, in: game) == expectedSan)
+    #expect(try sanSerializer.move(for: expectedSan, in: game) == move)
     #expect(game.position == position)
 
-    game.make(move: move)
+    try game.make(move: move)
 
     #expect(fenSerializer.serialize(position: game.position) == expectedFen)
     #expect(game.movesHistory == [move])

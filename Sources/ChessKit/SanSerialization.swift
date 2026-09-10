@@ -7,197 +7,132 @@
 //  Copyright © 2021-2025 Päike Mikrosüsteemid OÜ. All rights reserved.
 //
 
-import Foundation
-
 /// SAN moves serialization and deserialization.
 public class SanSerialization {
-
     /// Creates a serializer for use by the calling app.
     public init() {}
 
-    private let kCastlingKing = "O-O"
-    private let kCastlingQueen = "O-O-O"
-
-    // MARK: - Serialization
-
-    /**
-     Serialize move to SAN string.
-    
-     - Parameters:
-        - move: `Move` object that sould be serialized.
-        - game: A game which is about to make a given move.
-    
-     - Returns: SAN string describing given move.
-     */
-    public func san(for move: Move, in game: Game) -> String {
-        switch game.position.board[move.from]?.kind {
-        case .none:
-            return ""
-        case .pawn:
-            return self.processPawn(move: move, in: game)
-        case .king:
-            return self.processKing(move: move, in: game)
-        default:
-            return self.processPiece(move: move, in: game)
+    /// Writes canonical SAN for a legal move without modifying the game.
+    /// - Throws: `SanSerializationError.illegalMove` for an invalid or illegal move.
+    public func san(for move: Move, in game: Game) throws -> String {
+        guard game.isLegal(move: move), let piece = game.position.board[move.from] else {
+            throw SanSerializationError.illegalMove
         }
+
+        var notation: String
+        if Self.isCastling(move, kind: piece.kind) {
+            notation = move.to.file == 6 ? "O-O" : "O-O-O"
+        } else {
+            notation = self.moveText(for: move, piece: piece, in: game)
+        }
+
+        return notation + self.checkSuffix(after: move, in: game)
     }
 
-    private func processPawn(move: Move, in game: Game) -> String {
-        let targetPiece = game.position.board[move.to]
-        let isEnPassant = move.to == game.position.state.enPasant
-        let isCapture = targetPiece != nil || isEnPassant
+    private func moveText(for move: Move, piece: Piece, in game: Game) -> String {
+        let isCapture = Self.isCapture(move, kind: piece.kind, in: game.position)
+        var notation = ""
 
-        var san: String
-        if isCapture {
-            san = "\(move.from.coordinate.first!)x\(move.to)"
+        if piece.kind == .pawn {
+            if isCapture {
+                notation += String(Board.fileCoordinates[move.from.file])
+            }
         } else {
-            san = move.to.coordinate
+            notation += piece.kind.description.uppercased()
+            notation += self.disambiguation(for: move, kind: piece.kind, in: game)
         }
+
+        if isCapture {
+            notation += "x"
+        }
+        notation += move.to.coordinate
 
         if let promotion = move.promotion {
-            san += "=\(promotion)".uppercased()
+            notation += "=" + promotion.description.uppercased()
         }
-        return self.appendCheck(to: san, with: move, in: game)
+
+        return notation
     }
 
-    private func processKing(move: Move, in game: Game) -> String {
-        if move.from.file == 4 {
-            if move.to.file == 6 {
-                return self.appendCheck(to: "O-O", with: move, in: game)
-            } else if move.to.file == 2 {
-                return self.appendCheck(to: "O-O-O", with: move, in: game)
+    private func disambiguation(for move: Move, kind: PieceKind, in game: Game) -> String {
+        let alternatives = game.legalMoves.filter {
+            $0.to == move.to && $0.from != move.from && game.position.board[$0.from]?.kind == kind
+        }
+
+        guard !alternatives.isEmpty else {
+            return ""
+        }
+
+        let sharesFile = alternatives.contains { $0.from.file == move.from.file }
+        let sharesRank = alternatives.contains { $0.from.rank == move.from.rank }
+
+        if !sharesFile {
+            return String(Board.fileCoordinates[move.from.file])
+        }
+        if !sharesRank {
+            return String(Board.rankCoordinates[move.from.rank])
+        }
+        return move.from.coordinate
+    }
+
+    /// Reads one SAN move and requires a unique legal match.
+    ///
+    /// Surrounding whitespace, zero-based castling spelling, and omitted check suffixes are accepted.
+    /// A supplied check suffix must be correct. Annotations belong to the host app.
+    /// - Throws: `SanSerializationError` for invalid, illegal, ambiguous, or incorrect-check input.
+    public func move(for san: String, in game: Game) throws -> Move {
+        let parsed = try ParsedSanMove(san: san, turn: game.position.state.turn)
+        let candidates = game.legalMoves.filter { move in
+            guard game.position.board[move.from]?.kind == parsed.kind,
+                move.to == parsed.destination, move.promotion == parsed.promotion
+            else {
+                return false
             }
+
+            if let file = parsed.fromFile, move.from.file != file {
+                return false
+            }
+            if let rank = parsed.fromRank, move.from.rank != rank {
+                return false
+            }
+
+            return Self.isCastling(move, kind: parsed.kind) == parsed.isCastling
+                && Self.isCapture(move, kind: parsed.kind, in: game.position) == parsed.isCapture
         }
-        return self.processPiece(move: move, in: game)
+
+        guard let move = candidates.first else {
+            throw SanSerializationError.illegalMove
+        }
+        guard candidates.count == 1 else {
+            throw SanSerializationError.ambiguousMove
+        }
+
+        if let suffix = parsed.checkSuffix,
+            String(suffix) != self.checkSuffix(after: move, in: game)
+        {
+            throw SanSerializationError.invalidCheckSuffix
+        }
+
+        return move
     }
 
-    private func processPiece(move: Move, in game: Game) -> String {
-        let sourceSquare = game.position.board[move.from]!
-        let targetSquare = game.position.board[move.to]
-
-        var san = sourceSquare.kind.description.uppercased()
-
-        let candidates = game.legalMoves
-            .filter { $0.to == move.to && $0 != move }
-            .filter { game.position.board[$0.from]?.kind == sourceSquare.kind }
-
-        if !candidates.filter({ $0.from.file == move.from.file }).isEmpty {
-            san.append(move.from.coordinate.last!)
-        } else if !candidates.filter({ $0.from.rank == move.from.rank }).isEmpty {
-            san.append(move.from.coordinate.first!)
-        } else if !candidates.isEmpty {
-            san.append(move.from.coordinate.first!)
-        }
-
-        if targetSquare != nil {
-            san.append("x")
-        }
-
-        san.append(move.to.coordinate)
-
-        return self.appendCheck(to: san, with: move, in: game)
+    private static func isCastling(_ move: Move, kind: PieceKind) -> Bool {
+        kind == .king && abs(move.to.file - move.from.file) == 2
     }
 
-    private func appendCheck(to san: String, with move: Move, in game: Game) -> String {
-        let gameCopy = game.deepCopy()
-        gameCopy.make(move: move)
-        if gameCopy.isMate {
-            return san + "#"
-        } else if gameCopy.isCheck {
-            return san + "+"
-        }
-        return san
+    private static func isCapture(_ move: Move, kind: PieceKind, in position: Position) -> Bool {
+        position.board[move.to] != nil || (kind == .pawn && move.to == position.state.enPasant)
     }
 
-    // MARK: - Deserialization
+    private func checkSuffix(after move: Move, in game: Game) -> String {
+        let next = Game(position: game.position.applyingLegalMove(move))
 
-    /**
-     Deserialize move from given SAN string.
-    
-     - Parameters:
-        - san: String containing SAN move.
-        - game: A game which is about to make a given SAN move.
-    
-     - Returns: `Move` object initialized from given SAN string.
-     */
-    public func move(for san: String, in game: Game) -> Move {
-        let promotion = self.promotion(in: san)
-
-        let san =
-            san
-            .replacingOccurrences(of: "+", with: "")
-            .replacingOccurrences(of: "#", with: "")
-            .replacingOccurrences(of: "=[QRBN]", with: "", options: .regularExpression)
-
-        if [kCastlingKing, kCastlingQueen].contains(san) {
-            return self.processCastling(san: san, in: game)
-        } else if san.count == 2 {
-            return self.processPawn(san: san, promotion: promotion, in: game)
-        } else {
-            return self.process(san: san, promotion: promotion, in: game)
+        if next.isMate {
+            return "#"
         }
-    }
-
-    private func promotion(in san: String) -> PieceKind? {
-        if let range = san.range(of: "=[QRBN]", options: .regularExpression) {
-            let piece = san[range]
-                .replacingOccurrences(of: "=", with: "")
-                .lowercased()
-            return PieceKind(rawValue: piece)
+        if next.isCheck {
+            return "+"
         }
-        return nil
+        return ""
     }
-
-    private func processCastling(san: String, in game: Game) -> Move {
-        let file = san == kCastlingKing ? "g" : "c"
-        let rank = game.position.state.turn == .white ? "1" : "8"
-        return Move(string: "e\(rank)\(file)\(rank)")
-    }
-
-    private func processPawn(san: String, promotion: PieceKind?, in game: Game) -> Move {
-        let move = game.legalMoves
-            .filter { $0.to.description == san }
-            .filter { game.position.board[$0.from]?.kind == .pawn }
-            .first!
-        return Move(from: move.from, to: move.to, promotion: promotion)
-    }
-
-    private func process(san: String, promotion: PieceKind?, in game: Game) -> Move {
-        var move = ""
-        var s = san.replacingOccurrences(of: "x", with: "")
-
-        move += "\(s.popLast()!)"
-        move = "\(s.popLast()!)" + move
-
-        var pieceKind: PieceKind? = nil
-        if s.first!.isUppercase {
-            pieceKind = PieceKind(rawValue: "\(s.lowercased().first!)")
-        }
-
-        if pieceKind == nil {
-            let move = game.legalMoves
-                .filter({ $0.to.description == move })
-                .filter({ game.position.board[$0.from]?.kind == .pawn })
-                .filter({ $0.from.description.contains(s) })
-                .first!
-            return Move(from: move.from, to: move.to, promotion: promotion)
-        }
-
-        s = "\(s.dropFirst())"
-
-        var candidates = game.legalMoves
-            .filter { game.position.board[$0.from]?.kind == pieceKind }
-            .filter { $0.to.description == move }
-
-        if !s.isEmpty {
-            candidates =
-                candidates
-                .filter { $0.from.description.contains(s) }
-        }
-
-        move = candidates.first!.from.description + move
-
-        return Move(string: move)
-    }
-
 }

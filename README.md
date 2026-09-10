@@ -72,12 +72,14 @@ We keep ChessKit types behind the app's integration layer.
 The app controls user input, navigation, and data storage.
 The library supplies chess data and move operations.
 
-We check a move against `Game.legalMoves` before we call `Game.make`.
+We use `Game.legalMoves` to show available moves.
+We apply a move with `try Game.make(move:)`, which checks legality and counter bounds before changing the game.
 Direct board edits change piece placement without applying game rules.
 We use direct edits for position setup, not for game play.
 
 We read FEN with `try FenSerialization().deserialize(fen:)` and handle `FenSerializationError` in the app.
-The [FEN input guide](Documentation/FEN-INPUT.md) describes accepted input and error handling.
+The [FEN input guide](Documentation/FEN-INPUT.md) describes accepted position input and error handling.
+The [moves and SAN guide](Documentation/MOVES-AND-SAN.md) describes move parsing, notation, and game-update errors.
 
 ## Documentation
 

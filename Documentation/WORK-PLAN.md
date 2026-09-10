@@ -1,7 +1,8 @@
 # Work plan
 
 We will correct confirmed defects before we add new functions.
-We completed the serializer access, en passant, castling, and FEN input corrections described below in the working revision.
+We completed the serializer access and input contracts described below.
+We also corrected en passant, castling, and SAN conversion in the working revision.
 The remaining corrections are pending.
 The [known limits](KNOWN-LIMITS.md) contain the supporting findings.
 
@@ -70,8 +71,23 @@ We added public consumer tests for malformed records and accepted input boundari
 
 We preserve incomplete positions for editing and keep game-state legality separate.
 The [FEN input guide](FEN-INPUT.md) records the contract, migration, and validation limits.
-SAN and coordinate-move input checks remain pending.
-That work must also address counter overflow when a move follows an imported position.
+The later move and SAN correction completes their input contracts and protects counter increments.
+
+## Completed move and SAN input contracts
+
+We added public errors for coordinate input, SAN conversion, and game updates.
+We changed their public operations to throw recoverable errors.
+We reject illegal moves and calculate all updates before modifying game state.
+We use checked increments for halfmove, fullmove, and occurrence counters.
+
+We reproduced five failing tests with ten assertions before the correction.
+We also reproduced the fullmove overflow in an isolated test process.
+We corrected SAN ambiguity and full-square disambiguation.
+We test both colors, promotion choices, check suffixes, malformed input, and unchanged state after failure.
+The [moves and SAN guide](MOVES-AND-SAN.md) records the contract and migration.
+
+Position identity and game results remain the next rule domains.
+They are not completed by these input checks.
 
 ## Test plan
 
