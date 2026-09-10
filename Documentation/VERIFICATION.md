@@ -69,6 +69,13 @@ We do not compare invalid diagrams with a reference that has different editing s
 We test those boundaries through our public API instead.
 Neither this finite corpus nor the material reference proves exhaustive dead-position detection.
 
+## Adversarial black-box suite
+
+We keep an additional consumer target in `Tests/ChessKitAdversarialTests`.
+We design it from rules, public contracts, and frozen independent results without reading library internals.
+We include hostile text, illegal moves, edited diagrams, state isolation, and an expanded rules campaign.
+We document its matrix, commands, and limits in [adversarial testing](ADVERSARIAL-TESTING.md).
+
 ## Long lines
 
 We test lines of 2,000 and 10,000 half-moves and copies of their recorded state.

@@ -81,3 +81,20 @@ jobs:
         run: >-
           "$RUNNER_TEMP/chesskit-reference/bin/python" Tools/Verification/compare.py
           --binary Tools/Verification/.build/release/ChessKitVerify
+      - name: Check frozen adversarial expectations
+        run: >-
+          "$RUNNER_TEMP/chesskit-reference/bin/python" Tools/Verification/adversarial.py
+          --check-corpus Tests/ChessKitAdversarialTests/Fixtures/independent.json
+      - name: Run adversarial public API campaign
+        run: >-
+          "$RUNNER_TEMP/chesskit-reference/bin/python" Tools/Verification/adversarial.py
+          --binary Tools/Verification/.build/release/ChessKitVerify
+          --report "$RUNNER_TEMP/chesskit-adversarial-report.json"
+      - name: Upload adversarial evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: adversarial-report
+          path: ${{ runner.temp }}/chesskit-adversarial-report.json
+          if-no-files-found: error
+          retention-days: 14

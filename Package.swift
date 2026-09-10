@@ -27,5 +27,10 @@ let package = Package(
             name: "ChessKitPublicAPITests",
             dependencies: ["ChessKit"]
         ),
+        .testTarget(
+            name: "ChessKitAdversarialTests",
+            dependencies: ["ChessKit"],
+            resources: [.copy("Fixtures")]
+        ),
     ]
 )

@@ -79,3 +79,11 @@ We did not run tests on physical iOS hardware or an Intel Mac in this change.
 We use conservative dead-position detection and static position validation, not exhaustive reachability proofs.
 We have not regenerated the inherited API pages or prepared a release.
 The [game-state guide](GAME-STATE.md) and [known limits](KNOWN-LIMITS.md) define the supported contracts.
+
+## Additional adversarial evidence — 2026-09-10
+
+We retain the earlier implementation evidence above.
+We added a separate black-box suite without reading or modifying the library implementation.
+We now pass 145 test functions in Debug, Release, and the iPhone simulator.
+We also matched 23,702 positions and 327,848 candidate moves in the expanded independent campaign.
+We record the exact scope, commands, and limits in [adversarial testing](ADVERSARIAL-TESTING.md#local-results--2026-09-10).
