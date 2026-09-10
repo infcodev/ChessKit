@@ -53,8 +53,9 @@ We keep the coverage report as a GitHub artifact for 14 days.
 We do not upload coverage to Codecov or require a coverage token.
 
 The simulator build checks compilation. It does not run iOS tests.
-The existing tests do not replace a public API consumer test.
-We add consumer tests with the public API corrections in our work plan.
+We run `ChessKitPublicAPITests` with the main test command.
+This separate target uses `import ChessKit` without `@testable`.
+We extend these consumer tests when we change the public API.
 
 ## Review evidence
 

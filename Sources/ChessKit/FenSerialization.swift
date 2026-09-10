@@ -10,6 +10,9 @@
 /// FEN positions serialization and deserialization.
 public class FenSerialization {
 
+    /// Creates a serializer for use by the calling app.
+    public init() {}
+
     /**
      Deserialize position from given FEN string.
     

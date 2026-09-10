@@ -5,13 +5,14 @@ We separate source review findings from executed test results.
 
 ## Public serializers
 
-The FEN and SAN serializer classes have no public initializers.
-An external app cannot construct these serializers through the documented API.
-Internal tests use `@testable` and do not detect this access limit.
+We corrected this access limit in the working revision.
+The FEN and SAN serializer classes now have public initializers.
+We test their construction and basic conversions without `@testable` in a separate test target.
+We confirmed that these tests failed to compile before the correction.
 
 We track the upstream report in [issue 15](https://github.com/aperechnev/ChessKit/issues/15).
 [Pull request 16](https://github.com/aperechnev/ChessKit/pull/16) proposes public initializers and an external API test.
-We did not apply that change.
+We added the initializers and our own public API regression tests.
 
 ## Invalid input
 

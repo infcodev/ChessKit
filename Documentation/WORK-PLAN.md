@@ -1,14 +1,14 @@
 # Work plan
 
 We will correct confirmed defects before we add new functions.
-All work below is pending.
+We completed the first API correction in the working revision. The remaining corrections are pending.
 The [known limits](KNOWN-LIMITS.md) contain the supporting findings.
 
 ## Delivery order
 
 | Step | Work                           | Acceptance criteria                                                            |
 | ---- | ------------------------------ | ------------------------------------------------------------------------------ |
-| 1    | Public serializer initializers | An external package constructs both serializers without `@testable`.           |
+| 1    | Public serializer initializers | A separate consumer test target constructs both serializers without `@testable`.           |
 | 2    | Legal move defects             | Each reproduced defect has a passing regression test after the correction.     |
 | 3    | Input contracts                | Invalid FEN, SAN, and move input returns documented errors.                    |
 | 4    | SAN conversion                 | Capture markers and source-square disambiguation match the expected notation.  |
@@ -19,6 +19,13 @@ The [known limits](KNOWN-LIMITS.md) contain the supporting findings.
 We will define error types before we change parser signatures.
 We will document incompatible API changes separately from rule corrections.
 We will keep position editing separate from legal move generation.
+
+## Completed API correction
+
+We added public initializers for both serializers.
+We added a separate test target for public API consumption.
+We confirmed the access errors before the correction.
+We preserved the parser signatures and conversion behavior.
 
 ## Test plan
 
@@ -41,10 +48,10 @@ We will not present unexecuted tests as evidence of correctness.
 
 ## CI preparation
 
-We will replace the inherited branch filters with our agreed `main` workflow.
-We will review action versions and external uploads before we enable CI.
-We will keep credentials outside the source code.
-We will not use the original project's coverage configuration.
+We configured the `main` workflow with macOS tests and an iOS Simulator build.
+We pinned action revisions and removed the inherited Codecov configuration.
+We keep credentials outside the source code.
+We check CI results for each pull request.
 
 ## Release criteria
 

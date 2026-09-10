@@ -12,6 +12,9 @@ import Foundation
 /// SAN moves serialization and deserialization.
 public class SanSerialization {
 
+    /// Creates a serializer for use by the calling app.
+    public init() {}
+
     private let kCastlingKing = "O-O"
     private let kCastlingQueen = "O-O-O"
 

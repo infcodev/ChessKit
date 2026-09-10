@@ -23,5 +23,9 @@ let package = Package(
             name: "ChessKitTests",
             dependencies: ["ChessKit"]
         ),
+        .testTarget(
+            name: "ChessKitPublicAPITests",
+            dependencies: ["ChessKit"]
+        ),
     ]
 )

@@ -9,16 +9,18 @@ We started from upstream `master` at commit `bee00f535ae6c6182cc3d9c9a5bd5cfb5cb
 This commit is upstream version `2.0.0`.
 We use `main` as the default branch of [our fork](https://github.com/infcodev/ChessKit).
 
-We changed the project documentation only.
-We did not change the Swift source code or the existing tests.
+We updated the project documentation and CI configuration.
+We added public serializer initializers and a separate public API test target.
+We kept the existing chess rules and conversion methods unchanged.
 We did not publish a new package release.
 The inherited tags identify upstream releases, not our corrections.
 
 ## Integration status
 
-The public FEN and SAN serializers have no public initializers.
-An external app cannot construct these serializers through the documented upstream API.
-The board example in our README uses public board and piece initializers instead.
+We expose public initializers for the FEN and SAN serializers in the working revision.
+An external app can construct both serializers.
+The README board example remains valid.
+We did not change parser validation or chess rules with this correction.
 
 We do not recommend this revision for production use.
 The [known limits](KNOWN-LIMITS.md) record the current findings.
@@ -26,10 +28,10 @@ The [work plan](WORK-PLAN.md) defines the proposed corrections and tests.
 
 ## Existing tests
 
-The existing tests use `@testable import ChessKit`.
-These tests can access internal declarations.
-A successful run does not establish that the public API works from an external app.
-We will add an external consumer test before release.
+The original tests use `@testable import ChessKit` and can access internal declarations.
+We added `ChessKitPublicAPITests` as a separate test target with a plain `import ChessKit`.
+We test serializer construction, a FEN round trip, and SAN input and output for pawn and knight moves.
+These tests cover basic public conversions, not all parser behavior.
 
 ## Generated API pages
 
@@ -40,9 +42,10 @@ We will check the examples and generate new pages after the public API changes.
 
 ## CI
 
-We retain the upstream CI workflow without changes.
-It refers to upstream branches and external coverage configuration.
-We will review that workflow before we enable it for this fork.
+We configured CI for pushes and pull requests to `main`, with optional manual runs.
+We run tests with coverage on macOS and build for the iOS Simulator.
+We use Xcode 16.4 on `macos-15` and store coverage as a GitHub artifact.
+We removed the inherited Codecov configuration.
 
 ## Release publication
 

@@ -1,6 +1,12 @@
 # Change history
 
-## Unreleased — fork documentation
+## Unreleased
+
+We expose public initializers for `FenSerialization` and `SanSerialization`.
+We add a separate test target that uses only the public API.
+We keep the existing conversion methods and chess rules unchanged.
+
+### Fork documentation
 
 We made the README a project guide.
 We separated project status, known limits, and planned work into reference documents.
