@@ -1,3 +1,17 @@
+# Change history
+
+## Unreleased — fork documentation
+
+We made the README a project guide.
+We separated project status, known limits, and planned work into reference documents.
+We added contribution instructions and documentation rules.
+We retained the upstream source code, tests, license, and release history.
+We did not publish a new package release.
+
+## Upstream release history
+
+We preserve the original release notes below.
+
 ## [2.0.0] - 30.09.2025
 
 ### Added
