@@ -41,7 +41,20 @@ For a documentation-only change, we require a documentation review and a whitesp
 We do not require a new rule test for a text change.
 For public API changes, we require a consumer test without `@testable`.
 
-## Review requirements
+## Continuous integration
+
+We run CI for pushes to `main` and pull requests to `main`.
+We also support manual runs after the workflow is available on `main`.
+We use the `macos-15` runner with Xcode 16.4.
+We run the test suite with coverage and build the package for the iOS Simulator.
+We keep the coverage report as a GitHub artifact for 14 days.
+We do not upload coverage to Codecov or require a coverage token.
+
+The simulator build checks compilation. It does not run iOS tests.
+The existing tests do not replace a public API consumer test.
+We add consumer tests with the public API corrections in our work plan.
+
+## Review evidence
 
 We check behavior, public contracts, test evidence, and documentation.
 We use the [writing guide](Documentation/WRITING-GUIDE.md) for new prose.

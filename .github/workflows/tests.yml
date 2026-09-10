@@ -2,21 +2,59 @@ name: Tests
 
 on:
   push:
-    branches: [ master, develop ]
+    branches: [main]
   pull_request:
-    branches: [ develop ]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
 
 jobs:
   test:
-    runs-on: macos-latest
+    name: macOS tests and coverage
+    runs-on: macos-15
+    timeout-minutes: 20
     steps:
-    - uses: actions/checkout@v2
-    - run: swift test --enable-code-coverage
-    - uses: sersoft-gmbh/swift-coverage-action@v2.0.1
-      with:
-        format: lcov
-        output: .
-    - run: |
-        curl -Os https://uploader.codecov.io/latest/macos/codecov
-        chmod +x codecov
-        ./codecov -t a40ba6bb-c21e-4e2b-8947-12bb0605a008
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Run tests
+        run: swift test --enable-code-coverage
+      - name: Collect coverage
+        run: |
+          mkdir -p coverage
+          cp "$(swift test --show-codecov-path)" coverage/ChessKit.json
+      - name: Upload coverage
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: macos-coverage
+          path: coverage/ChessKit.json
+          if-no-files-found: error
+          retention-days: 14
+
+  ios-build:
+    name: iOS Simulator build
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Build package for iOS Simulator
+        run: >-
+          xcodebuild -scheme ChessKit
+          -destination 'generic/platform=iOS Simulator'
+          -derivedDataPath "$RUNNER_TEMP/ChessKit-iOS"
+          CODE_SIGNING_ALLOWED=NO build
