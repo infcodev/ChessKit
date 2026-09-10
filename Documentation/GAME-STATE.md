@@ -97,7 +97,4 @@ It is not an exhaustive dead-position proof.
 
 ## Migration
 
-We replace a board lookup with `game.repetitionCount` or `game.positionsCounter[PositionKey(position: game.position)]`.
-We handle the new `GameMoveError.invalidPosition` case.
-We validate a finished position edit before attempting play.
-We keep normal move application on `Game.make`, because direct edits reset the recorded line.
+We describe the position-key change, direct-edit behavior, and consumer integration in the [migration guide](MIGRATION.md).

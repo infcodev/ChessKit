@@ -83,41 +83,15 @@ The fullmove number changes only after Black moves.
 
 ## Migration
 
-We changed these public APIs to throwing operations:
+We describe all incompatible changes and app integration steps in the [migration guide](MIGRATION.md).
 
-- `Move.init(string:)`
-- `Game.make(move:)`, for both overloads
-- `SanSerialization.move(for:in:)`
-- `SanSerialization.san(for:in:)`
+## Validation and verification
 
-We include these changes in the planned major release.
+We reject invalid starting positions with `GameMoveError.invalidPosition` after the move and counter checks.
+We use `PositionKey` for repetition identity and reset evidence after direct position edits.
+The [game-state guide](GAME-STATE.md) defines these rules and static validation limits.
 
-1. Add `try` at each affected call.
-2. Handle the error with `do/catch`, or propagate it from a throwing function.
-3. Update the app interface only after the game update succeeds.
-4. Keep the current study visible when an operation fails.
-
-This example reads and applies one SAN move:
-
-```swift
-import ChessKit
-
-func applySAN(_ text: String, to game: Game) throws {
-    let serializer = SanSerialization()
-    let move = try serializer.move(for: text, in: game)
-    try game.make(move: move)
-}
-```
-
-## Evidence and remaining limits
-
-We reproduced unsupported promotions, illegal game updates, SAN ambiguity, incorrect capture and check markers, and missing full-square disambiguation.
-We also reproduced a fullmove overflow in a separate test process before the correction.
-We added public consumer tests for these defects and their accepted boundaries.
-We use internal access only to construct a repetition counter at its otherwise impractical storage limit.
-We retain the perft baseline and test SAN round trips for all legal moves in selected positions.
-
-We still depend on the legal move generator for rule correctness.
-We do not establish whether a position is reachable from legal play.
-These changes do not complete validation of arbitrary direct board or square edits.
-The occurrence key still uses piece placement; correcting that identity remains separate work.
+We retain public consumer tests, perft, regressions, and independent comparisons.
+We use internal access only for a repetition counter at its otherwise impractical storage limit.
+We keep the additional black-box target independent of library internals.
+We record executed results in [validation results](VALIDATION-RESULTS.md) and corrected defects in [history](HISTORY.md).

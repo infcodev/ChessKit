@@ -26,7 +26,8 @@ The package name, library product, and module name are `ChessKit`.
 
 ## Add the package
 
-For development, we use the `main` branch.
+For development, we use a reviewed candidate commit.
+We do not use an inherited upstream tag to obtain the fork corrections.
 The [project status](Documentation/PROJECT-STATUS.md) identifies the release baseline and current integration limits.
 
 1. Open the package dependency settings in your Xcode project.
@@ -36,7 +37,7 @@ The [project status](Documentation/PROJECT-STATUS.md) identifies the release bas
    https://github.com/infcodev/ChessKit.git
    ```
 
-3. Select the `main` branch.
+3. Select the reviewed commit identified for your integration.
 4. Add the `ChessKit` product to the required target.
 5. Import the module in your Swift source file:
 
@@ -87,8 +88,13 @@ The [moves and SAN guide](Documentation/MOVES-AND-SAN.md) describes move parsing
 
 ## Documentation
 
-- [Known limits](Documentation/KNOWN-LIMITS.md): version-specific defects and restrictions.
-- [Project status](Documentation/PROJECT-STATUS.md): baseline, releases, and inherited documentation.
+We use the [documentation index](Documentation/README.md) to separate current contracts, delivery work, and historical evidence.
+
+- [Migration](Documentation/MIGRATION.md): consumer changes from upstream 2.0.0.
+- [API reference](docs/documentation/chesskit/index.html): generated public declarations.
+
+- [Known limits](Documentation/KNOWN-LIMITS.md): current restrictions and verification limits.
+- [Project status](Documentation/PROJECT-STATUS.md): baseline, candidate, and release state.
 - [Work plan](Documentation/WORK-PLAN.md): development priorities and acceptance criteria.
 - [Verification](Documentation/VERIFICATION.md): test commands and independent comparisons.
 - [Contributions](CONTRIBUTING.md): defect reports and local checks.

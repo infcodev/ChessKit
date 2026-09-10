@@ -47,27 +47,9 @@ The same serializer remains available after a failed read.
 ## Migration
 
 We changed `deserialize(fen:)` to a throwing method.
-This is an incompatible public API change for the next major release.
 The serializer initializer and `serialize(position:)` signatures remain unchanged.
-
-1. Add `try` at each FEN read.
-2. Propagate the error from a throwing function, or handle it with `do/catch`.
-3. Select an app message from the error case.
-4. Keep the current study unchanged if the read fails.
-
-This example propagates the error to the caller:
-
-```swift
-import ChessKit
-
-func readPosition(from fen: String) throws -> Position {
-    let serializer = FenSerialization()
-    return try serializer.deserialize(fen: fen)
-}
-```
-
-We avoid `try!` for imported text.
-It converts a recoverable error into an app failure.
+We describe consumer changes and error handling in the [migration guide](MIGRATION.md).
+We avoid `try!` for imported text because it converts a recoverable error into an app failure.
 
 ## Validation boundary
 
@@ -77,7 +59,7 @@ We preserve an en passant target without requiring a capturing pawn.
 We keep these controls separate so that position editing remains possible.
 
 We accept counters through `Int.max` for storage and serialization.
-The later [move-input correction](MOVES-AND-SAN.md) rejects overflowing game updates with a recoverable error.
+The [game-update contract](MOVES-AND-SAN.md) rejects overflowing game updates with a recoverable error.
 SAN inspection does not increment those counters.
 A valid FEN format alone does not guarantee safe game play from an arbitrary edited position.
 
@@ -88,5 +70,5 @@ We test field errors, every board rank, whitespace, Unicode input, counter bound
 We use a public consumer target without `@testable` for the new input tests.
 We retain the existing rule tests and the perft baseline.
 
-We require the full test command and the iOS Simulator build before delivery.
-The build checks compilation; it does not run iOS tests.
+We require the full package tests, the iOS Simulator build, and simulator test execution before delivery.
+The [verification guide](VERIFICATION.md) separates build checks from executed tests.
