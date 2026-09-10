@@ -14,14 +14,16 @@ class KingMoving: ShortRangeMoving {
     }
 
     override func coveredSquares(from square: Square, in position: Position) -> [Square] {
-        let destinations =
-            super.coveredSquares(from: square, in: position) + self.castlingSquares(in: position)
-        return self.filterOppositeKingSquares(destinations: destinations, in: position)
+        let normalDestinations = super.coveredSquares(from: square, in: position)
+        let castlingDestinations = self.castlingSquares(from: square, in: position)
+        let destinations = normalDestinations + castlingDestinations
+
+        return self.filterOppositeKingSquares(destinations: destinations, from: square, in: position)
     }
 
-    private func filterOppositeKingSquares(destinations: [Square], in position: Position)
-        -> [Square]
-    {
+    private func filterOppositeKingSquares(
+        destinations: [Square], from origin: Square, in position: Position
+    ) -> [Square] {
         let mask =
             position.board.bitboards.bitboard(for: position.state.turn.negotiated)
             & position.board.bitboards.king
@@ -30,39 +32,58 @@ class KingMoving: ShortRangeMoving {
             return destinations
         }
 
-        let square = Square(bitboardMask: mask)
+        let oppositeKing = Square(bitboardMask: mask)
+        let startsUnderKingAttack =
+            abs(origin.file - oppositeKing.file) <= 1
+            && abs(origin.rank - oppositeKing.rank) <= 1
 
-        return
-            destinations
-            .filter { abs($0.file - square.file) > 1 || abs($0.rank - square.rank) > 1 }
+        return destinations.filter { destination in
+            let entersKingAttack =
+                abs(destination.file - oppositeKing.file) <= 1
+                && abs(destination.rank - oppositeKing.rank) <= 1
+            guard !entersKingAttack else {
+                return false
+            }
+
+            let isCastling = abs(destination.file - origin.file) > 1
+            return !isCastling || !startsUnderKingAttack
+        }
     }
 
-    private func castlingSquares(in position: Position) -> [Square] {
-        let castlings = position.state.castlings.filter { $0.color == position.state.turn }
+    private func castlingSquares(from square: Square, in position: Position) -> [Square] {
+        let color = position.state.turn
+        let rank = color == .white ? 0 : 7
+        guard square == Square(file: 4, rank: rank) else {
+            return []
+        }
 
-        var squares = [Square]()
-
-        let rank = position.state.turn == .white ? 0 : 7
-
+        let castlings = position.state.castlings.filter { $0.color == color }
         let shouldBeEmpty: [PieceKind: [Int]] = [
             .king: [5, 6],
             .queen: [1, 2, 3],
         ]
+        var squares = [Square]()
 
         for castling in castlings {
-            let isEmpty = shouldBeEmpty[castling.kind]!
-                .map {
-                    let square = Square(file: $0, rank: rank)
-                    return (position.board.bitboards.white | position.board.bitboards.black)
-                        & square.bitboardMask == Int64.zero
-                }
-                .reduce(true) { $0 && $1 }
-
-            if isEmpty {
-                let file = castling.kind == .queen ? 2 : 6
-                let square = Square(file: file, rank: rank)
-                squares.append(square)
+            guard let emptyFiles = shouldBeEmpty[castling.kind] else {
+                continue
             }
+
+            let rookFile = castling.kind == .king ? 7 : 0
+            let rookSquare = Square(file: rookFile, rank: rank)
+            guard position.board[rookSquare] == Piece(kind: .rook, color: color) else {
+                continue
+            }
+
+            let isPathClear = emptyFiles.allSatisfy { file in
+                position.board[Square(file: file, rank: rank)] == nil
+            }
+            guard isPathClear else {
+                continue
+            }
+
+            let destinationFile = castling.kind == .king ? 6 : 2
+            squares.append(Square(file: destinationFile, rank: rank))
         }
 
         return squares

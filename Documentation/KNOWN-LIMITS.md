@@ -24,9 +24,21 @@ These failures can stop the app instead of returning an error.
 A consumer must check a move before it calls this method.
 This check still depends on the correctness of the legal move generator.
 
-We also found limits in position validation.
-For example, the castling generator trusts the supplied rights without checking that the required rook exists.
 We will define parser and position checks separately.
+The castling checks below do not validate a complete imported position.
+
+## Castling
+
+We reproduced and corrected castling moves with missing or incorrect starting pieces.
+We now require the king on e1 or e8 and a friendly rook on the relevant corner.
+We retain the checks for castling rights and an empty path.
+We also reject castling from the attack of an adjacent opposing king in an imported position.
+
+We confirmed 22 failures before the correction.
+We added 70 cases across five parameterized tests for both colors and both sides.
+We cover attacks on the king's route, including attacks by pinned pieces.
+We also verify that an attacked rook or b-file square does not prevent valid castling.
+We check SAN, the resulting FEN, move history, and castling rights after all four castling moves.
 
 ## En passant simulation
 

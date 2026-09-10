@@ -13,6 +13,8 @@ We updated the project documentation and CI configuration.
 We added public serializer initializers and a separate public API test target.
 We corrected en passant simulation and SAN capture output.
 We added tests for legal moves, illegal moves, and capture notation.
+We corrected castling generation to require the starting pieces and respect attacks by the opposing king.
+We added castling regression cases and controls for valid moves.
 We did not publish a new package release.
 The inherited tags identify upstream releases, not our corrections.
 

@@ -8,6 +8,10 @@ We correct en passant simulation so that other pieces do not remove the pawn.
 We include the source file and capture marker in en passant SAN, including captures that give check.
 We add regression tests for both colors and preserve the public method signatures.
 
+We require the king and a friendly rook on their starting squares before we generate castling moves.
+We reject castling from a square attacked by an adjacent opposing king.
+We test blocked paths, attacked squares, valid castling, and the resulting position.
+
 ### Fork documentation
 
 We made the README a project guide.

@@ -1,7 +1,7 @@
 # Work plan
 
 We will correct confirmed defects before we add new functions.
-We completed the public API correction and the two en passant corrections in the working revision.
+We completed the public API, en passant, and castling corrections described below in the working revision.
 The remaining corrections are pending.
 The [known limits](KNOWN-LIMITS.md) contain the supporting findings.
 
@@ -39,6 +39,18 @@ We test both colors, pawn checks, rook checks, captures, and ordinary pawn advan
 We wrote the small test positions for these regressions.
 We use [FIDE Laws of Chess](https://handbook.fide.com/chapter/E012023), articles 3.7.3 and 3.9.2, for the capture and king-safety rules.
 We keep malformed position validation separate from these corrections.
+
+## Completed castling corrections
+
+We require the king and a friendly rook on their starting squares.
+We prevent castling from the attack of an adjacent opposing king.
+We preserve the existing public method signatures.
+We confirmed 22 failures before the correction and added 70 parameterized cases.
+
+We wrote the test positions for these regressions.
+We use [FIDE Laws of Chess](https://handbook.fide.com/chapter/E012023), articles 3.8.2 and 3.9.2, for the castling requirements.
+We test both colors, both sides, blocked paths, and attacked squares.
+We also test valid castling with an attacked rook or b-file square.
 
 ## Test plan
 
