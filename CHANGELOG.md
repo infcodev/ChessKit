@@ -12,6 +12,10 @@ We require the king and a friendly rook on their starting squares before we gene
 We reject castling from a square attacked by an adjacent opposing king.
 We test blocked paths, attacked squares, valid castling, and the resulting position.
 
+We add a perft baseline with seven reference positions and 30 count checks.
+We add mate and stalemate controls and root-move diagnostics for count failures.
+We preserve the current rules implementation in this test-only change.
+
 ### Fork documentation
 
 We made the README a project guide.

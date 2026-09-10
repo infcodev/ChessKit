@@ -37,6 +37,10 @@ We added `ChessKitPublicAPITests` as a separate test target with a plain `import
 We test serializer construction, a FEN round trip, and SAN input and output for pawn and knight moves.
 These tests cover basic public conversions, not all parser behavior.
 
+We added a perft baseline with 30 published count checks and terminal-position controls.
+We include these checks in the normal test suite.
+The [perft notes](PERFT.md) describe their scope and reference data.
+
 ## Generated API pages
 
 We retain the upstream pages in `docs/` as historical reference material.

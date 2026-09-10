@@ -84,7 +84,10 @@ We can identify stalemate from an empty legal move list when the side to move is
 ## Test and platform limits
 
 The existing suite tests piece moves, special moves, SAN, FEN, and some game sequences.
-We did not find a perft suite or an independent rules comparison in this revision.
+We added a perft baseline with seven reference positions and two terminal-position controls.
+We check all intermediate depths, through depth four for the initial position and rook ending, and depth three for the others.
+The [perft notes](PERFT.md) record the sources, counts, and limits.
+We have not added a live comparison against an independent chess implementation.
 We did not validate this revision across an iOS and macOS release matrix.
 
 The [project status](PROJECT-STATUS.md) describes the inherited API pages and CI configuration.

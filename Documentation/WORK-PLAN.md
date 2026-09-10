@@ -52,13 +52,21 @@ We use [FIDE Laws of Chess](https://handbook.fide.com/chapter/E012023), articles
 We test both colors, both sides, blocked paths, and attacked squares.
 We also test valid castling with an attacked rook or b-file square.
 
+## Completed perft baseline
+
+We added seven reference positions with 30 count checks and separate mate and stalemate controls.
+We compare the results at every depth through each position's stated maximum.
+We preserve the starting position, history, and repetition counter during traversal.
+We report counts per root move when a result differs.
+The [perft notes](PERFT.md) record data attribution, commands, and validation limits.
+
 ## Test plan
 
 We will add these test groups:
 
 - Public API tests without internal access.
 - Regression tests for reproduced defects.
-- Perft tests with reference positions and expected node counts.
+- Deeper perft tests beyond the completed baseline.
 - Tests for both colors and all four promotion choices.
 - Castling, en passant, pinned piece, and double-check tests.
 - FEN and SAN input and output tests.
